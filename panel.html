@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TransGestión - Dashboard</title>
+    <title>TransGestión - Panel Profesional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,6 +11,8 @@
     <style>
         .sidebar { transition: all 0.3s; width: 0; overflow: hidden; }
         .sidebar.open { width: 260px; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex">
@@ -21,8 +23,8 @@
             <button onclick="toggleMenu()" class="lg:hidden text-white"><i class="fas fa-times"></i></button>
         </div>
         <nav class="flex-1 overflow-y-auto p-4 space-y-2 text-sm">
-            <a href="#" class="flex items-center p-3 bg-blue-600 rounded-lg"><i class="fas fa-chart-line mr-3"></i> Panel de Control</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-plus-circle mr-3"></i> Crear Viajes</a>
+            <a href="javascript:void(0)" onclick="mostrarSeccion('dashboard')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-chart-line mr-3"></i> Panel de Control</a>
+            <a href="javascript:void(0)" onclick="mostrarSeccion('crear-viaje')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-plus-circle mr-3"></i> Crear Viajes</a>
             <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-route mr-3"></i> Mis Viajes</a>
             <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-users mr-3"></i> Choferes</a>
             <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-filter mr-3"></i> Filtrar Viajes</a>
@@ -49,102 +51,185 @@
             </div>
         </header>
 
-        <main class="p-4 lg:p-8 overflow-y-auto">
-            <div class="max-w-6xl mx-auto space-y-8">
-                
+        <main id="main-content" class="p-4 lg:p-8 overflow-y-auto">
+            
+            <div id="section-dashboard" class="space-y-8">
                 <h2 class="text-3xl font-black text-gray-800">Panel de Control</h2>
-
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-700 mb-4 italic">Viajes Diarios</h3>
-                    <div class="h-64">
-                        <canvas id="viajesChart"></canvas>
-                    </div>
+                    <div class="h-64"><canvas id="viajesChart"></canvas></div>
                 </div>
-
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden text-sm">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="text-lg font-bold text-gray-700 italic">Viajes Recientes</h3>
-                        <span class="text-xs font-bold text-blue-500 uppercase tracking-widest">Últimos 5 registros</span>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-400 text-xs uppercase tracking-widest">
-                                    <th class="p-4 font-bold">Choferes</th>
-                                    <th class="p-4 font-bold">Precio</th>
-                                    <th class="p-4 font-bold">Origen</th>
-                                </tr>
-                            </thead>
-                            <tbody id="viajesTableBody" class="text-gray-700 font-medium">
-                                </tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 text-gray-400 uppercase text-[10px] tracking-widest">
+                            <tr><th class="p-4">Choferes</th><th class="p-4">Precio</th><th class="p-4">Origen</th></tr>
+                        </thead>
+                        <tbody id="viajesTableBody">
+                            <tr class="border-b"><td class="p-4 font-bold">Juan Pérez</td><td class="p-4 text-green-600">$150</td><td class="p-4">Habana</td></tr>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
 
+            <div id="section-crear-viaje" class="hidden max-w-4xl mx-auto bg-white p-6 rounded-3xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-black text-gray-800 mb-6 flex items-center"><i class="fas fa-plus-circle text-blue-600 mr-3"></i> Elaborar Viaje</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Colaboración</label>
+                        <select id="v-colab" class="w-full p-3 bg-gray-50 border rounded-xl outline-none"><option>Ninguna</option><option>Agencia A</option></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Chofer (Teléfono)</label>
+                        <div class="flex space-x-2">
+                            <input id="v-chofer-tel" type="tel" placeholder="55555555" class="flex-1 p-3 bg-gray-50 border rounded-xl">
+                            <button onclick="buscarChofer()" class="bg-blue-600 text-white px-4 rounded-xl"><i class="fas fa-search"></i></button>
+                        </div>
+                        <div id="chofer-info" class="mt-2 p-3 bg-blue-50 rounded-xl hidden text-xs">
+                            <p id="info-nombre" class="font-bold text-gray-700"></p>
+                            <p id="info-fondo" class="text-green-600 font-bold"></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Cliente (Tel)</label><input id="v-cliente" type="tel" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
+                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Pax</label><input id="v-pax" type="number" class="w-full p-3 bg-gray-50 border rounded-xl text-center"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Precio ($)</label>
+                        <input id="v-precio" type="number" class="w-full p-3 bg-blue-50 border-blue-200 border rounded-xl text-lg font-bold text-blue-700">
+                        <div class="mt-2 p-3 bg-gray-100 rounded-xl grid grid-cols-2 gap-2">
+                            <input id="calc-dist" type="number" placeholder="Km" class="p-2 text-xs border rounded-lg">
+                            <input id="calc-tarifa" type="number" placeholder="Tarifa" class="p-2 text-xs border rounded-lg">
+                            <button onclick="calcularPrecio()" class="col-span-2 bg-gray-700 text-white text-[10px] py-2 rounded-lg font-bold">CALCULAR PRECIO</button>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Origen</label>
+                        <input id="v-origen" type="text" class="w-full p-3 bg-gray-50 border rounded-xl mb-2">
+                        <div id="contenedor-paradas" class="space-y-2 mb-2"></div>
+                        <button onclick="añadirParada()" class="text-blue-600 text-xs font-bold"><i class="fas fa-plus-circle mr-1"></i> Añadir Parada Intermedia</button>
+                    </div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Destino</label><input id="v-destino" type="text" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Grupo WhatsApp</label><input id="v-grupo" type="text" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
+                    <div class="md:col-span-2 grid grid-cols-2 gap-3 py-2 text-xs font-bold">
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-transf"> <span>Transferencia</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-precio-cli"> <span>Precio Cliente</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-aire"> <span>Aire Acond.</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-regreso"> <span>Ida y Vuelta</span></label>
+                    </div>
+                    <div class="md:col-span-2 border-t pt-4">
+                        <label class="flex items-center space-x-2 text-sm font-black cursor-pointer mb-3">
+                            <input type="checkbox" id="v-es-reserva" onchange="toggleReserva()" class="w-5 h-5"> <span>VIAJE RESERVADO</span>
+                        </label>
+                        <div id="zona-reserva" class="hidden grid grid-cols-2 gap-4"><input id="v-fecha" type="date" class="p-3 bg-blue-50 border rounded-xl"><input id="v-hora" type="time" class="p-3 bg-blue-50 border rounded-xl"></div>
+                    </div>
+                    <div class="md:col-span-2"><label class="block text-sm font-bold text-gray-700 mb-1">Observaciones</label><textarea id="v-obs" rows="2" class="w-full p-3 bg-gray-50 border rounded-xl"></textarea></div>
+                </div>
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <button onclick="generarPlanillas()" class="bg-gray-800 text-white p-4 rounded-2xl font-black shadow-lg">PLANILLA</button>
+                    <button onclick="alert('Guardado con éxito (Próximamente en base de datos)')" class="bg-blue-600 text-white p-4 rounded-2xl font-black shadow-lg">CREAR VIAJE</button>
+                </div>
             </div>
         </main>
     </div>
 
-    <script>
-        // Configuración Sidebar
-        function toggleMenu() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
-        // Abrir por defecto en PC
-        if(window.innerWidth > 1024) toggleMenu();
+    <div id="modal-planillas" class="fixed inset-0 bg-black/80 hidden z-[100] p-4 flex items-center justify-center overflow-y-auto">
+        <div class="bg-white w-full max-w-lg rounded-3xl p-6 relative">
+            <button onclick="cerrarModal()" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h4 class="text-blue-700 font-bold mb-2">Planilla Chofer</h4>
+                    <pre id="txt-chofer" class="text-[10px] whitespace-pre-wrap font-mono p-2 bg-white rounded border"></pre>
+                    <button onclick="enviarWhatsApp('chofer')" class="w-full mt-2 bg-green-500 text-white py-2 rounded-lg text-sm font-bold">Enviar WhatsApp</button>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h4 class="text-green-700 font-bold mb-2">Planilla Cliente</h4>
+                    <pre id="txt-cliente" class="text-[10px] whitespace-pre-wrap font-mono p-2 bg-white rounded border"></pre>
+                    <button onclick="enviarWhatsApp('cliente')" class="w-full mt-2 bg-green-600 text-white py-2 rounded-lg text-sm font-bold">Enviar WhatsApp</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Datos del usuario
+    <script>
+        // CONFIGURACIÓN INICIAL
         const tel = localStorage.getItem('userTel');
         const rol = localStorage.getItem('userRole');
         if (!tel) window.location.href = 'index.html';
         document.getElementById('userTel').innerText = tel;
         document.getElementById('userRoleBadge').innerText = rol === 'manager' ? 'Administrador' : 'Gestor';
 
-        // Muestra de datos (Simulados para que veas el diseño)
-        const mockViajes = [
-            { chofer: "Juan Pérez", precio: "$150.00", origen: "Habana" },
-            { chofer: "Luis Gómez", precio: "$200.00", origen: "Matanzas" },
-            { chofer: "Pedro Ruiz", precio: "$120.00", origen: "Cienfuegos" },
-            { chofer: "Carlos Más", precio: "$300.00", origen: "Santiago" },
-            { chofer: "Jose Vila", precio: "$180.00", origen: "Habana" }
-        ];
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+        if(window.innerWidth > 1024) toggleMenu();
 
-        const tbody = document.getElementById('viajesTableBody');
-        tbody.innerHTML = mockViajes.map(v => `
-            <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td class="p-4"><div class="flex items-center"><i class="fas fa-user-circle text-blue-500 mr-2"></i> ${v.chofer}</div></td>
-                <td class="p-4 font-bold text-green-600">${v.precio}</td>
-                <td class="p-4"><span class="bg-gray-100 px-3 py-1 rounded-full text-xs">${v.origen}</span></td>
-            </tr>
-        `).join('');
+        function mostrarSeccion(id) {
+            document.getElementById('section-dashboard').classList.add('hidden');
+            document.getElementById('section-crear-viaje').classList.add('hidden');
+            document.getElementById('section-' + id).classList.remove('hidden');
+            if(window.innerWidth < 1024) toggleMenu();
+        }
 
-        // Gráfica de Viajes Diarios
+        // LÓGICA CREAR VIAJE
+        function añadirParada() {
+            const input = document.createElement('input');
+            input.placeholder = "Parada intermedia...";
+            input.className = "w-full p-3 bg-yellow-50 border border-yellow-200 rounded-xl mb-2 text-sm";
+            document.getElementById('contenedor-paradas').appendChild(input);
+        }
+
+        function buscarChofer() {
+            const num = document.getElementById('v-chofer-tel').value;
+            if(num) {
+                document.getElementById('chofer-info').classList.remove('hidden');
+                document.getElementById('info-nombre').innerText = "Nombre: Chofer de prueba";
+                document.getElementById('info-fondo').innerText = "Fondo Actual: $500.00";
+            }
+        }
+
+        function calcularPrecio() {
+            const km = document.getElementById('calc-dist').value;
+            const t = document.getElementById('calc-tarifa').value;
+            if(km && t) document.getElementById('v-precio').value = km * t;
+        }
+
+        function toggleReserva() {
+            document.getElementById('zona-reserva').classList.toggle('hidden', !document.getElementById('v-es-reserva').checked);
+        }
+
+        function generarPlanillas() {
+            const p = document.getElementById('v-precio').value;
+            const c = document.getElementById('v-cliente').value;
+            const o = document.getElementById('v-origen').value;
+            const d = document.getElementById('v-destino').value;
+            const px = document.getElementById('v-pax').value || 1;
+
+            const pCh = `*DATOS DEL VIAJE*\nPrecio: ${p}\nCliente: ${c}\nOrigen: ${o}\nDestino: ${d}\nPax: ${px}\nFondo Actual: $500\n\n⚠️ IMPORTANTE ⚠️\n• 15 min máx. llegada.\n• 15 min cortesía espera. (Extra: 25 cup/min)\n• Tarde: descuento 50%.`;
+            const pCl = `*Taxi En Camino*\nPrecio: ${p}\nChofer: Prueba\nAuto: Estándar\n\n⚠️ *IMPORTANTE* ⚠️\n• Parada extra recalcula costo.\n• 10 min cortesía. (Extra: 25 cup/min).\n• Cancelar en origen: paga 50%.`;
+
+            document.getElementById('txt-chofer').innerText = pCh;
+            document.getElementById('txt-cliente').innerText = pCl;
+            document.getElementById('modal-planillas').classList.remove('hidden');
+        }
+
+        function enviarWhatsApp(tipo) {
+            const num = tipo === 'chofer' ? document.getElementById('v-chofer-tel').value : document.getElementById('v-cliente').value;
+            const msg = encodeURIComponent(tipo === 'chofer' ? document.getElementById('txt-chofer').innerText : document.getElementById('txt-cliente').innerText);
+            window.open(`https://wa.me/53${num}?text=${msg}`, '_blank');
+        }
+
+        function cerrarModal() { document.getElementById('modal-planillas').classList.add('hidden'); }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+        // GRÁFICA INICIAL
         const ctx = document.getElementById('viajesChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
-                datasets: [{
-                    label: 'Cantidad de Viajes',
-                    data: [12, 19, 3, 5, 2, 3, 10], // Estos datos vendrán de Supabase después
-                    borderColor: '#1e5bb9',
-                    backgroundColor: 'rgba(30, 91, 185, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
-            }
+            data: { labels: ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'], datasets: [{ label: 'Viajes', data: [5, 10, 8, 15, 6, 20, 12], borderColor: '#1e5bb9', tension: 0.4 }] },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
     </script>
 </body>
 </html>
