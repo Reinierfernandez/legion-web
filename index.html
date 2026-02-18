@@ -37,9 +37,10 @@
     </div>
 
     <script>
-        // Tus credenciales de Supabase
+        // Configuración oficial de tu proyecto
         const SUPABASE_URL = 'https://gxwhscquahosusskekmk.supabase.co';
-        const SUPABASE_KEY = 'Sb_publishable_UO9XYF70yP9CosTSEd-zeA_UnUG00xf';
+        const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4d2hzY3F1YWhvc3Vzc2tla21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzODI1NDksImV4cCI6MjA4Njk1ODU0OX0.xWE4cOmhiszUgnx3uzsPraXD3x1SYBmxW3CSvuIiQxc';
+        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function login() {
@@ -49,6 +50,7 @@
             const btn = document.getElementById('loginBtn');
 
             if(!tel || !password) {
+                msg.style.color = "red";
                 msg.innerText = "Por favor, completa todos los campos";
                 return;
             }
@@ -57,11 +59,11 @@
             btn.innerText = "Verificando...";
             msg.innerText = "";
 
-            // Definir rol (Manager para tu número, Gestor para el resto)
+            // Rol según el número de teléfono
             let userRole = (tel === '54322676') ? 'manager' : 'gestor';
 
             try {
-                // Guardar o actualizar usuario en la tabla
+                // Registrar o actualizar el usuario en la tabla de Supabase
                 const { error } = await supabaseClient
                     .from('usuarios')
                     .upsert({ 
@@ -72,21 +74,21 @@
 
                 if (error) throw error;
 
-                // Guardar sesión local
+                // Guardar datos en el navegador para el Panel
                 localStorage.setItem('userTel', tel);
                 localStorage.setItem('userRole', userRole);
 
                 msg.style.color = "green";
                 msg.innerText = "Acceso concedido. Entrando...";
 
-                // Redirigir al panel
+                // Ir al panel después de 1 segundo
                 setTimeout(() => {
                     window.location.href = 'panel.html';
                 }, 1000);
 
             } catch (err) {
                 msg.style.color = "red";
-                msg.innerText = "Error de conexión: " + err.message;
+                msg.innerText = "Error: " + err.message;
                 btn.disabled = false;
                 btn.innerText = "Iniciar sesión";
             }
