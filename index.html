@@ -6,36 +6,41 @@
     <title>TransGestión - Acceso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-[#1e5bb9] text-white min-h-screen flex flex-col items-center p-6 font-sans text-center">
+<body class="bg-[#1e5bb9] text-white min-h-screen flex flex-col items-center p-6 text-center">
     
-    <div class="bg-white p-4 rounded-2xl mb-6 mt-4 shadow-lg w-40 h-40 flex items-center justify-center mx-auto">
+    <div class="bg-white p-4 rounded-2xl mb-6 mt-4 shadow-lg w-32 h-32 flex items-center justify-center mx-auto">
         <div class="text-center">
-            <h2 class="text-5xl font-serif text-black leading-none">RF</h2>
-            <p class="text-black font-bold text-sm tracking-tighter uppercase">TransGestión</p>
+            <h2 class="text-4xl font-black text-black leading-none">RF</h2>
+            <p class="text-black font-bold text-[10px] tracking-tighter uppercase">TransGestión</p>
         </div>
     </div>
 
-    <h1 class="text-4xl font-extrabold mb-10 drop-shadow-md">Acceso al Sistema</h1>
+    <h1 class="text-3xl font-black mb-10 drop-shadow-md italic uppercase">Acceso al Sistema</h1>
 
-    <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2rem] shadow-2xl text-gray-800 text-left">
+    <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2.5rem] shadow-2xl text-gray-800 text-left">
         <div class="mb-6">
-            <label class="block text-lg font-bold mb-1">Teléfono</label>
-            <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none">
+            <label class="block text-sm font-black uppercase mb-1 ml-2">Teléfono</label>
+            <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white border-none rounded-2xl p-4 text-lg outline-none shadow-inner">
         </div>
         
         <div class="mb-8">
-            <label class="block text-lg font-bold mb-1">Contraseña</label>
-            <input id="pass" type="password" placeholder="*******" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none">
+            <label class="block text-sm font-black uppercase mb-1 ml-2">Contraseña</label>
+            <input id="pass" type="password" placeholder="*******" class="w-full bg-white border-none rounded-2xl p-4 text-lg outline-none shadow-inner">
         </div>
 
-        <button onclick="login()" id="loginBtn" class="w-full bg-[#2b6ada] text-white font-bold py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-all">
-            Iniciar sesión
+        <button onclick="login()" id="loginBtn" class="w-full bg-[#2b6ada] text-white font-black py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-all uppercase italic">
+            Entrar
         </button>
         <p id="msg" class="text-center mt-4 text-sm font-bold text-red-600 h-5"></p>
     </div>
 
     <script>
+        // Tus credenciales de Supabase
         const URL_PROYECTO = 'https://gxwhscquahosusskekmk.supabase.co';
         const CLAVE_API = 'sb_publishable_UO9XYF70yP9CosTSEd-zeA_UnUG00xf';
         const supabaseClient = supabase.createClient(URL_PROYECTO, CLAVE_API);
@@ -47,36 +52,44 @@
             const btn = document.getElementById('loginBtn');
 
             if(!tel || !password) {
-                msg.innerText = "Completa todos los campos";
+                msg.innerText = "Completa los datos";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "Entrando...";
+            btn.innerText = "Verificando...";
 
             try {
-                // Simplificamos: Solo guardamos el registro sin pedirle a Supabase que verifique conflictos
-                const { error } = await supabaseClient
+                // Buscamos en la tabla 'usuarios' que creaste manualmente
+                const { data, error } = await supabaseClient
                     .from('usuarios')
-                    .insert([{ telefono: tel, password: password, rol: (tel === '54322676' ? 'manager' : 'gestor') }]);
+                    .select('*')
+                    .eq('telefono', tel)
+                    .eq('password', password)
+                    .single();
 
-                // Si da error porque ya existe el número, lo ignoramos y dejamos pasar
-                // porque lo importante es que la conexión funciona.
-                
-                localStorage.setItem('userTel', tel);
-                localStorage.setItem('userRole', (tel === '54322676' ? 'manager' : 'gestor'));
+                if (error || !data) {
+                    msg.innerText = "Usuario o clave incorrectos";
+                    btn.disabled = false;
+                    btn.innerText = "Entrar";
+                } else {
+                    // Guardamos la sesión localmente
+                    localStorage.setItem('userTel', data.telefono);
+                    localStorage.setItem('userName', data.nombre);
+                    localStorage.setItem('userRole', data.rol);
 
-                msg.style.color = "green";
-                msg.innerText = "¡Bienvenido!";
+                    msg.style.color = "green";
+                    msg.innerText = "¡Bienvenido, " + data.nombre + "!";
 
-                setTimeout(() => {
-                    window.location.href = 'panel.html';
-                }, 800);
+                    setTimeout(() => {
+                        window.location.href = 'panel.html';
+                    }, 800);
+                }
 
             } catch (err) {
-                msg.innerText = "Error: " + err.message;
+                msg.innerText = "Error de conexión";
                 btn.disabled = false;
-                btn.innerText = "Iniciar sesión";
+                btn.innerText = "Entrar";
             }
         }
     </script>
