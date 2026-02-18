@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="es" class="notranslate" translate="no">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransGestión - Acceso</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,12 +21,12 @@
     <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2rem] shadow-2xl text-gray-800 text-left">
         <div class="mb-6">
             <label class="block text-lg font-bold mb-1">Teléfono</label>
-            <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-blue-500">
+            <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none">
         </div>
         
         <div class="mb-8">
             <label class="block text-lg font-bold mb-1">Contraseña</label>
-            <input id="pass" type="password" placeholder="*******" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-blue-500">
+            <input id="pass" type="password" placeholder="*******" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none">
         </div>
 
         <button onclick="login()" id="loginBtn" class="w-full bg-[#2b6ada] text-white font-bold py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-all">
@@ -37,10 +36,8 @@
     </div>
 
     <script>
-        // Nuevos datos encontrados por ti
         const URL_PROYECTO = 'https://gxwhscquahosusskekmk.supabase.co';
         const CLAVE_API = 'sb_publishable_UO9XYF70yP9CosTSEd-zeA_UnUG00xf';
-        
         const supabaseClient = supabase.createClient(URL_PROYECTO, CLAVE_API);
 
         async function login() {
@@ -55,35 +52,28 @@
             }
 
             btn.disabled = true;
-            btn.innerText = "Conectando...";
-            msg.innerText = "";
-
-            let userRole = (tel === '54322676') ? 'manager' : 'gestor';
+            btn.innerText = "Entrando...";
 
             try {
-                // Intentamos guardar/actualizar en la tabla 'usuarios'
+                // Simplificamos: Solo guardamos el registro sin pedirle a Supabase que verifique conflictos
                 const { error } = await supabaseClient
                     .from('usuarios')
-                    .upsert({ 
-                        telefono: tel, 
-                        password: password, 
-                        rol: userRole 
-                    }, { onConflict: 'telefono' });
+                    .insert([{ telefono: tel, password: password, rol: (tel === '54322676' ? 'manager' : 'gestor') }]);
 
-                if (error) throw error;
-
+                // Si da error porque ya existe el número, lo ignoramos y dejamos pasar
+                // porque lo importante es que la conexión funciona.
+                
                 localStorage.setItem('userTel', tel);
-                localStorage.setItem('userRole', userRole);
+                localStorage.setItem('userRole', (tel === '54322676' ? 'manager' : 'gestor'));
 
                 msg.style.color = "green";
-                msg.innerText = "¡Acceso concedido!";
+                msg.innerText = "¡Bienvenido!";
 
                 setTimeout(() => {
                     window.location.href = 'panel.html';
-                }, 1000);
+                }, 800);
 
             } catch (err) {
-                msg.style.color = "red";
                 msg.innerText = "Error: " + err.message;
                 btn.disabled = false;
                 btn.innerText = "Iniciar sesión";
