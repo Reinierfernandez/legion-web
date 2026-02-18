@@ -1,389 +1,236 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONGO MUSUNDI - Gestión de Transporte</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        
-        /* Tipografía específica para la marca solicitada */
-        .brand-font { font-weight: 900; font-size: 1.5rem; letter-spacing: -0.05em; color: #ffffff; }
-        
-        .sidebar { transition: width 0.3s ease; width: 0; overflow: hidden; }
-        .sidebar.open { width: 280px; }
-        
-        .active-nav { background: #2563eb; color: white !important; font-weight: 900; }
-        .tab-active { border-bottom: 4px solid #2563eb; color: #2563eb; font-weight: 900; }
-        
-        /* Scrollbar suave */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    </style>
-</head>
-<body class="bg-slate-100 flex h-screen overflow-hidden">
-
-    <aside id="sidebar" class="sidebar fixed lg:relative z-50 h-full bg-slate-900 flex flex-col shadow-2xl">
-        <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-            <span class="brand-font italic">CONGO MUSUNDI</span>
-            <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-times"></i></button>
-        </div>
-        
-        <nav class="flex-1 overflow-y-auto p-4 space-y-2 text-sm text-slate-400">
-            <a href="#" onclick="navTo('dashboard')" id="n-dashboard" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-chart-pie mr-3 w-5"></i> Panel de Control</a>
-            <a href="#" onclick="navTo('crear-viaje')" id="n-crear-viaje" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-plus-circle mr-3 w-5"></i> Crear Viajes</a>
-            <a href="#" onclick="navTo('mis-viajes')" id="n-mis-viajes" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-list-ul mr-3 w-5"></i> Mis Viajes</a>
-            <a href="#" onclick="navTo('choferes')" id="n-choferes" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-user-friends mr-3 w-5"></i> Choferes</a>
-            <a href="#" onclick="navTo('filtrar-viajes')" id="n-filtrar-viajes" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-search-plus mr-3 w-5"></i> Filtrar Viajes</a>
-            <a href="#" onclick="navTo('tarjetas')" id="n-tarjetas" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-credit-card mr-3 w-5"></i> Tarjetas</a>
-            <a href="#" onclick="navTo('usuarios')" id="n-usuarios" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-id-badge mr-3 w-5"></i> Usuarios</a>
-            
-            <div class="pt-4 pb-2 px-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Próximamente</div>
-            <div class="space-y-1 opacity-50 cursor-not-allowed">
-                <div class="flex items-center p-3"><i class="fas fa-wallet mr-3 w-5"></i> Economía</div>
-                <div class="flex items-center p-3"><i class="fab fa-whatsapp mr-3 w-5"></i> Api WhatsApp</div>
-            </div>
-        </nav>
-        
-        <div class="p-4 bg-slate-950">
-            <button onclick="location.reload()" class="w-full py-3 bg-red-600/20 text-red-500 rounded-xl font-bold text-xs uppercase">Cerrar Sesión</button>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col min-w-0">
-        <header class="h-16 bg-white border-b flex items-center justify-between px-6">
-            <button onclick="toggleSidebar()" class="text-slate-500 text-xl"><i class="fas fa-bars"></i></button>
-            <div class="flex items-center gap-3">
-                <div class="text-right leading-none">
-                    <p class="text-[10px] font-black text-slate-400 uppercase">Administrador</p>
-                    <p class="text-sm font-bold text-slate-700">5355555555</p>
-                </div>
-                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-black">A</div>
-            </div>
-        </header>
-
-        <div id="main-scroll" class="flex-1 overflow-y-auto p-4 lg:p-8">
-            
-            <div id="sec-dashboard" class="content-section space-y-8 animate-in fade-in duration-500">
-                <h2 class="text-3xl font-black italic tracking-tighter">Panel de Control</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border">
-                        <h3 class="font-black text-slate-400 uppercase text-xs mb-4 italic">Viajes Recientes</h3>
-                        <table class="w-full text-left text-sm">
-                            <thead><tr class="text-slate-400 border-b"><th class="pb-2">Chofer</th><th class="pb-2">Precio</th><th class="pb-2">Origen</th></tr></thead>
-                            <tbody id="dash-recientes">
-                                <tr><td class="py-3 font-bold">Mario López</td><td class="py-3 font-black text-blue-600">$1,500</td><td class="py-3 italic">Vedado</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border h-80">
-                        <h3 class="font-black text-slate-400 uppercase text-xs mb-4 italic">Viajes Diarios</h3>
-                        <canvas id="chart-diario"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sec-crear-viaje" class="content-section hidden max-w-4xl mx-auto bg-white p-8 rounded-[3rem] shadow-xl border">
-                <h2 class="text-2xl font-black mb-8 italic"><i class="fas fa-plus-circle text-blue-600 mr-2"></i> Elaborar Viaje</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Colaboración</label>
-                        <select class="w-full p-4 bg-slate-50 rounded-2xl border-0 ring-1 ring-slate-200"><option>Ninguna</option></select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Chofer (Búsqueda)</label>
-                        <div class="flex gap-2">
-                            <input id="v-search-ch" type="tel" placeholder="Teléfono" class="flex-1 p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200 outline-none">
-                            <button onclick="buscarSimulado()" class="bg-blue-600 text-white px-5 rounded-2xl"><i class="fas fa-search"></i></button>
-                        </div>
-                        <div id="res-busqueda" class="hidden mt-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                            <p id="res-nombre" class="font-black text-blue-900"></p>
-                            <p id="res-auto" class="text-xs text-blue-700 italic"></p>
-                            <p id="res-fondo" class="text-sm font-black text-green-600 mt-1"></p>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Precio ($)</label>
-                        <input id="v-precio" type="number" class="w-full p-4 bg-blue-50 rounded-2xl ring-2 ring-blue-200 text-2xl font-black text-blue-700">
-                        <div class="mt-2 flex gap-2">
-                            <input id="c-km" type="number" placeholder="KM" class="w-1/2 p-2 text-xs border rounded-lg">
-                            <input id="c-t" type="number" placeholder="Tarifa" class="w-1/2 p-2 text-xs border rounded-lg">
-                            <button onclick="calcPrecio()" class="bg-slate-800 text-white px-3 rounded-lg text-[10px] font-black">CALC</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Pasajeros (Pax)</label>
-                        <input type="number" value="1" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200 font-bold">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Origen</label>
-                        <input id="v-origen" type="text" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200 mb-2">
-                        <div id="cont-paradas" class="space-y-2 mb-2"></div>
-                        <button onclick="nuevaParada()" class="text-blue-600 text-[10px] font-black uppercase tracking-widest">+ Añadir Parada</button>
-                    </div>
-                    <div class="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y text-[10px] font-black uppercase">
-                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Transferencia</label>
-                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Aire Acond.</label>
-                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Precio Cliente</label>
-                        <label class="flex items-center"><input type="checkbox" id="check-reserva" onchange="toggleReservado()"> RESERVADO</label>
-                    </div>
-                    <div id="box-reserva" class="hidden md:col-span-2 grid grid-cols-2 gap-4">
-                        <input type="date" class="p-4 bg-blue-50 rounded-2xl border-0 ring-1 ring-blue-200">
-                        <input type="time" class="p-4 bg-blue-50 rounded-2xl border-0 ring-1 ring-blue-200">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Observaciones</label>
-                        <textarea rows="3" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200"></textarea>
-                    </div>
-                </div>
-                <div class="mt-10 grid grid-cols-2 gap-4">
-                    <button onclick="verPlanilla()" class="bg-slate-900 text-white p-5 rounded-2xl font-black uppercase shadow-xl">Planilla</button>
-                    <button class="bg-blue-600 text-white p-5 rounded-2xl font-black uppercase shadow-xl">Crear Viaje</button>
-                </div>
-            </div>
-
-            <div id="sec-choferes" class="content-section hidden space-y-6">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-3xl font-black italic tracking-tighter">Choferes</h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="bg-white p-6 rounded-[2.5rem] border shadow-sm flex justify-between items-center relative">
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 text-2xl"><i class="fas fa-user"></i></div>
-                            <div>
-                                <p class="font-black text-slate-800 uppercase italic">Mario López</p>
-                                <p class="text-xs text-slate-400 font-bold">5355555555</p>
-                                <p class="text-[10px] font-black text-green-600 mt-1 uppercase">$1,250.00 Fondo</p>
-                            </div>
-                        </div>
-                        <button onclick="toggleDrop('dr-ch-1')" class="text-slate-300 p-2"><i class="fas fa-ellipsis-v"></i></button>
-                        <div id="dr-ch-1" class="hidden absolute right-6 top-16 bg-white border shadow-2xl rounded-2xl w-32 z-10 overflow-hidden font-black text-[10px] uppercase">
-                            <button onclick="navTo('perfil-detalle')" class="w-full p-4 text-left hover:bg-slate-50 border-b">Ver</button>
-                            <button onclick="confirm('¿Eliminar Chofer?')" class="w-full p-4 text-left hover:bg-red-50 text-red-500">Eliminar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sec-perfil-detalle" class="content-section hidden space-y-8">
-                <button onclick="navTo('choferes')" class="text-blue-600 font-black text-xs uppercase italic"><i class="fas fa-arrow-left mr-2"></i> Volver a Choferes</button>
-                <div class="bg-white rounded-[3.5rem] p-10 shadow-2xl border-t-8 border-blue-600">
-                    <div class="flex flex-col md:flex-row gap-10 items-center md:items-start">
-                        <div class="w-56 h-64 bg-slate-100 rounded-[3rem] border-8 border-white shadow-xl flex items-center justify-center italic text-slate-300 text-6xl">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <div class="flex-1 text-center md:text-left">
-                            <h3 class="text-4xl font-black italic tracking-tighter">MARIO LÓPEZ</h3>
-                            <div class="mt-6 flex flex-wrap gap-4 justify-center md:justify-start">
-                                <div class="bg-slate-50 px-6 py-4 rounded-3xl text-center shadow-inner">
-                                    <p class="text-[10px] font-black text-slate-400 uppercase">Fondo Actual</p>
-                                    <p class="text-xl font-black text-green-600">$1,250.00</p>
-                                </div>
-                                <div class="bg-slate-50 px-6 py-4 rounded-3xl text-center shadow-inner">
-                                    <p class="text-[10px] font-black text-slate-400 uppercase">Hoy</p>
-                                    <p class="text-xl font-black text-blue-600">0</p>
-                                </div>
-                            </div>
-                            <div class="mt-6 flex gap-6 text-[11px] font-black uppercase text-slate-500">
-                                <label class="flex items-center"><input type="checkbox" class="mr-2"> Trabajar sin Créditos</label>
-                                <div class="flex items-center gap-3">Grupo: <label><input type="radio" name="g"> A</label> <label><input type="radio" name="g"> B</label></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-3 mt-10">
-                        <button class="bg-slate-100 py-4 rounded-2xl font-black text-[10px] uppercase">Filtrar Viajes</button>
-                        <button class="bg-green-600 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-green-100">WhatsApp</button>
-                        <button class="bg-red-100 text-red-600 py-4 rounded-2xl font-black text-[10px] uppercase">Eliminar</button>
-                    </div>
-
-                    <div class="mt-12">
-                        <div class="flex border-b text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <button onclick="tabInternal('info')" id="tab-info" class="p-4 tab-active">Información</button>
-                            <button onclick="tabInternal('auto')" id="tab-auto" class="p-4">Auto</button>
-                            <button onclick="tabInternal('fondo')" id="tab-fondo" class="p-4">Fondo</button>
-                        </div>
-                        <div id="cont-tab-perfil" class="py-8 min-h-[300px]">
-                            </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sec-filtrar-viajes" class="content-section hidden max-w-2xl mx-auto bg-white p-10 rounded-[3rem] shadow-xl border">
-                <h2 class="text-2xl font-black italic mb-8">Filtrar Historial</h2>
-                <div class="space-y-6">
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Dato a buscar</label>
-                        <input type="text" placeholder="Ej: Nombre o Teléfono" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Tipo de Filtro</label>
-                        <select class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200">
-                            <option>Fecha</option><option>Desde-Hasta</option><option>Mes</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-4 pt-6">
-                        <button onclick="navTo('dashboard')" class="flex-1 py-4 bg-slate-100 rounded-2xl font-black text-xs uppercase">Cancelar</button>
-                        <button class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">Filtrar</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <div id="mod-fondos" class="fixed inset-0 bg-slate-900/80 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xs rounded-[3rem] p-8 shadow-2xl text-center">
-            <h4 id="f-modal-tit" class="text-2xl font-black italic mb-6 uppercase">Agregar</h4>
-            <div class="space-y-4">
-                <div id="box-metodo">
-                    <label class="text-[10px] font-black uppercase text-slate-400">Método</label>
-                    <select id="f-met" class="w-full p-4 bg-slate-50 rounded-2xl font-bold"><option>Efectivo</option><option>Transferencia</option></select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400">Cantidad ($)</label>
-                    <input id="f-cant" type="number" class="w-full p-4 bg-slate-50 rounded-2xl text-2xl font-black text-blue-600 text-center">
-                </div>
-                <button onclick="procesarAccionFondo()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg">Procesar</button>
-                <button onclick="document.getElementById('mod-fondos').classList.add('hidden')" class="text-slate-400 text-[10px] font-black uppercase">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="mod-planilla" class="fixed inset-0 bg-slate-900/90 hidden z-[100] flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white w-full max-w-xl rounded-[3rem] p-8 relative">
-            <button onclick="document.getElementById('mod-planilla').classList.add('hidden')" class="absolute top-6 right-8 text-2xl">&times;</button>
-            <div class="space-y-6">
-                <div>
-                    <h5 class="text-[10px] font-black uppercase text-blue-600 mb-2">Planilla para el Chofer</h5>
-                    <pre id="txt-ch" class="bg-slate-50 p-5 rounded-3xl text-[10px] font-mono whitespace-pre-wrap border"></pre>
-                    <button class="w-full mt-3 bg-green-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-green-100"><i class="fab fa-whatsapp mr-2"></i> WhatsApp Chofer</button>
-                </div>
-                <div>
-                    <h5 class="text-[10px] font-black uppercase text-green-600 mb-2">Planilla para el Cliente</h5>
-                    <pre id="txt-cl" class="bg-slate-50 p-5 rounded-3xl text-[10px] font-mono whitespace-pre-wrap border"></pre>
-                    <button class="w-full mt-3 bg-slate-900 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg"><i class="fab fa-whatsapp mr-2"></i> WhatsApp Cliente</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- NAVEGACIÓN ---
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        if(window.innerWidth > 1024) toggleSidebar();
-
-        function navTo(id) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active-nav'));
-            
-            document.getElementById('sec-' + id).classList.remove('hidden');
-            if(document.getElementById('n-' + id)) document.getElementById('n-' + id).classList.add('active-nav');
-            
-            if(window.innerWidth < 1024 && id !== 'perfil-detalle') toggleSidebar();
-            document.getElementById('main-scroll').scrollTop = 0;
-            if(id === 'perfil-detalle') tabInternal('info');
-        }
-
-        function toggleDrop(id) { document.getElementById(id).classList.toggle('hidden'); }
-
-        // --- CREAR VIAJE ---
-        function buscarSimulado() {
-            document.getElementById('res-busqueda').classList.remove('hidden');
-            document.getElementById('res-nombre').innerText = "MARIO LÓPEZ PÉREZ";
-            document.getElementById('res-auto').innerText = "Hyundai i10 • Gris • P123456";
-            document.getElementById('res-fondo').innerText = "Fondo Actual: $1,250.00";
-        }
-        function calcPrecio() {
-            const km = document.getElementById('c-km').value;
-            const t = document.getElementById('c-t').value;
-            if(km && t) document.getElementById('v-precio').value = km * t;
-        }
-        function nuevaParada() {
-            const i = document.createElement('input');
-            i.className = "w-full p-4 bg-yellow-50 rounded-2xl border-0 ring-1 ring-yellow-100 text-sm italic mb-2";
-            i.placeholder = "Indique parada intermedia...";
-            document.getElementById('cont-paradas').appendChild(i);
-        }
-        function toggleReservado() {
-            document.getElementById('box-reserva').classList.toggle('hidden', !document.getElementById('check-reserva').checked);
-        }
-        function verPlanilla() {
-            const preCh = document.getElementById('txt-ch');
-            const preCl = document.getElementById('txt-cl');
-            const p = document.getElementById('v-precio').value;
-            const o = document.getElementById('v-origen').value;
-
-            preCh.innerText = `*DATOS DEL VIAJE*\nPrecio: ${p}\nOrigen: ${o}\nFondo Actual: $1,250\n\n⚠️ IMPORTANTE ⚠️\n• 15 min máximo llegada.\n• 15 min abordaje cortesía.`;
-            preCl.innerText = `*Taxi En Camino*\nPrecio: ${p}\nChofer: Mario\nAuto: Hyundai\n\n⚠️ *IMPORTANTE* ⚠️\n• Parada extra recalcula costo.`;
-            document.getElementById('mod-planilla').classList.remove('hidden');
-        }
-
-        // --- TABS PERFIL CHOFER ---
-        function tabInternal(type) {
-            document.querySelectorAll('[id^="tab-"]').forEach(b => b.classList.remove('tab-active'));
-            document.getElementById('tab-' + type).classList.add('tab-active');
-            const cont = document.getElementById('cont-tab-perfil');
-
-            if(type === 'info') {
-                cont.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-black uppercase italic text-slate-400">
-                    <div>Nombre <p class="text-slate-800 text-lg not-italic mt-1">Mario</p></div>
-                    <div>Apellidos <p class="text-slate-800 text-lg not-italic mt-1">López Pérez</p></div>
-                    <div>Teléfono <p class="text-blue-600 text-lg not-italic mt-1">5355555555</p></div>
-                </div>`;
-            } else if(type === 'auto') {
-                cont.innerHTML = `<div class="space-y-6">
-                    <div class="w-full h-48 bg-slate-50 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center italic text-slate-300">Foto Vehículo</div>
-                    <div class="grid grid-cols-3 gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        <div>Marca <p class="text-slate-800 text-sm">Hyundai</p></div>
-                        <div>Modelo <p class="text-slate-800 text-sm">i10</p></div>
-                        <div>Color <p class="text-slate-800 text-sm">Gris</p></div>
-                    </div>
-                    <div class="flex gap-6 pt-4 text-[11px] font-black uppercase">
-                        <label><input type="checkbox" checked disabled> Aire</label>
-                        <label><input type="checkbox" checked disabled> Licencia Operativa</label>
-                    </div>
-                </div>`;
-            } else if(type === 'fondo') {
-                cont.innerHTML = `
-                <div class="flex gap-2 mb-6">
-                    <button onclick="openModF('AGREGAR')" class="bg-green-600 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase shadow-lg">Agregar</button>
-                    <button onclick="openModF('RETIRAR')" class="bg-orange-600 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase shadow-lg">Retirar</button>
-                    <button onclick="alert('Operaciones rectificadas')" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase">Rectificar Fondo</button>
-                </div>
-                <div class="overflow-x-auto"><table class="w-full text-[10px] border-collapse">
-                    <thead class="bg-slate-50 text-slate-400 font-black uppercase">
-                        <tr><th class="p-3 border">Usuario</th><th class="p-3 border">Metodo</th><th class="p-3 border text-blue-600">Saldo</th><th class="p-3 border">Fondo</th><th class="p-3 border text-green-600">Activo</th><th class="p-3 border">Fecha</th></tr>
-                    </thead>
-                    <tbody class="text-center font-bold">
-                        <tr class="border-b"><td>Admin</td><td>Efectivo</td><td class="text-blue-600">+$500</td><td>$750</td><td class="text-green-700 font-black">$1,250</td><td class="text-slate-400">18/02/26</td></tr>
-                    </tbody>
-                </table></div>`;
-            }
-        }
-
-        // --- FONDOS MODAL ---
-        function openModF(t) {
-            document.getElementById('mod-fondos').classList.remove('hidden');
-            document.getElementById('f-modal-tit').innerText = t;
-            document.getElementById('box-metodo').classList.toggle('hidden', t === 'RETIRAR');
-        }
-        function procesarAccionFondo() { alert('Operación procesada'); document.getElementById('mod-fondos').classList.add('hidden'); }
-
-        // --- CHART ---
-        const ctx = document.getElementById('chart-diario').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['L','M','X','J','V','S','D'],
-                datasets: [{ label: 'Viajes', data: [10, 15, 8, 20, 25, 40, 35], borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37, 99, 235, 0.05)' }]
-            },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-        });
-    </script>
-</body>
-</html>
+‎<!DOCTYPE html>
+‎<html lang="es">
+‎<head>
+‎    <meta charset="UTF-8">
+‎    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+‎    <title>TransGestión - Panel Profesional</title>
+‎    <script src="https://cdn.tailwindcss.com"></script>
+‎    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+‎    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+‎    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+‎    <style>
+‎        .sidebar { transition: all 0.3s; width: 0; overflow: hidden; }
+‎        .sidebar.open { width: 260px; }
+‎        ::-webkit-scrollbar { width: 5px; }
+‎        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+‎    </style>
+‎</head>
+‎<body class="bg-gray-100 min-h-screen flex">
+‎
+‎    <div id="sidebar" class="sidebar fixed lg:relative z-50 h-screen bg-gray-900 text-white flex flex-col shadow-2xl">
+‎        <div class="p-5 text-xl font-black border-b border-gray-800 flex justify-between items-center">
+‎            <span>TRANSGESTIÓN</span>
+‎            <button onclick="toggleMenu()" class="lg:hidden text-white"><i class="fas fa-times"></i></button>
+‎        </div>
+‎        <nav class="flex-1 overflow-y-auto p-4 space-y-2 text-sm">
+‎            <a href="javascript:void(0)" onclick="mostrarSeccion('dashboard')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-chart-line mr-3"></i> Panel de Control</a>
+‎            <a href="javascript:void(0)" onclick="mostrarSeccion('crear-viaje')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-plus-circle mr-3"></i> Crear Viajes</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-route mr-3"></i> Mis Viajes</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-users mr-3"></i> Choferes</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-filter mr-3"></i> Filtrar Viajes</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-clock mr-3"></i> Pagos Pendientes</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-check-double mr-3"></i> Pagos por Aprobar</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-credit-card mr-3"></i> Tarjetas</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-exchange-alt mr-3"></i> Transferencias</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-handshake mr-3"></i> Colaboración</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-user-cog mr-3"></i> Usuarios</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-wallet mr-3"></i> Economía</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-address-book mr-3"></i> Clientes</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-cog mr-3"></i> Configuración</a>
+‎            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fab fa-whatsapp mr-3"></i> API WhatsApp</a>
+‎        </nav>
+‎        <button onclick="logout()" class="p-4 bg-red-900 hover:bg-red-700 text-xs font-bold uppercase tracking-widest">Cerrar Sesión</button>
+‎    </div>
+‎
+‎    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+‎        <header class="bg-white shadow-sm p-4 flex items-center justify-between">
+‎            <button onclick="toggleMenu()" class="text-gray-600 text-2xl"><i class="fas fa-bars"></i></button>
+‎            <div class="flex items-center space-x-4">
+‎                <span id="userRoleBadge" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Cargando...</span>
+‎                <span id="userTel" class="text-gray-600 font-medium"></span>
+‎            </div>
+‎        </header>
+‎
+‎        <main id="main-content" class="p-4 lg:p-8 overflow-y-auto">
+‎            
+‎            <div id="section-dashboard" class="space-y-8">
+‎                <h2 class="text-3xl font-black text-gray-800">Panel de Control</h2>
+‎                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+‎                    <h3 class="text-lg font-bold text-gray-700 mb-4 italic">Viajes Diarios</h3>
+‎                    <div class="h-64"><canvas id="viajesChart"></canvas></div>
+‎                </div>
+‎                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden text-sm">
+‎                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+‎                        <h3 class="text-lg font-bold text-gray-700 italic">Viajes Recientes</h3>
+‎                    </div>
+‎                    <table class="w-full text-left">
+‎                        <thead class="bg-gray-50 text-gray-400 uppercase text-[10px] tracking-widest">
+‎                            <tr><th class="p-4">Choferes</th><th class="p-4">Precio</th><th class="p-4">Origen</th></tr>
+‎                        </thead>
+‎                        <tbody id="viajesTableBody">
+‎                            <tr class="border-b"><td class="p-4 font-bold">Juan Pérez</td><td class="p-4 text-green-600">$150</td><td class="p-4">Habana</td></tr>
+‎                        </tbody>
+‎                    </table>
+‎                </div>
+‎            </div>
+‎
+‎            <div id="section-crear-viaje" class="hidden max-w-4xl mx-auto bg-white p-6 rounded-3xl shadow-lg border border-gray-200">
+‎                <h2 class="text-2xl font-black text-gray-800 mb-6 flex items-center"><i class="fas fa-plus-circle text-blue-600 mr-3"></i> Elaborar Viaje</h2>
+‎                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+‎                    <div>
+‎                        <label class="block text-sm font-bold text-gray-700 mb-1">Colaboración</label>
+‎                        <select id="v-colab" class="w-full p-3 bg-gray-50 border rounded-xl outline-none"><option>Ninguna</option><option>Agencia A</option></select>
+‎                    </div>
+‎                    <div>
+‎                        <label class="block text-sm font-bold text-gray-700 mb-1">Chofer (Teléfono)</label>
+‎                        <div class="flex space-x-2">
+‎                            <input id="v-chofer-tel" type="tel" placeholder="55555555" class="flex-1 p-3 bg-gray-50 border rounded-xl">
+‎                            <button onclick="buscarChofer()" class="bg-blue-600 text-white px-4 rounded-xl"><i class="fas fa-search"></i></button>
+‎                        </div>
+‎                        <div id="chofer-info" class="mt-2 p-3 bg-blue-50 rounded-xl hidden text-xs">
+‎                            <p id="info-nombre" class="font-bold text-gray-700"></p>
+‎                            <p id="info-fondo" class="text-green-600 font-bold"></p>
+‎                        </div>
+‎                    </div>
+‎                    <div class="grid grid-cols-2 gap-4">
+‎                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Cliente (Tel)</label><input id="v-cliente" type="tel" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
+‎                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Pax</label><input id="v-pax" type="number" class="w-full p-3 bg-gray-50 border rounded-xl text-center"></div>
+‎                    </div>
+‎                    <div>
+‎                        <label class="block text-sm font-bold text-gray-700 mb-1">Precio ($)</label>
+‎                        <input id="v-precio" type="number" class="w-full p-3 bg-blue-50 border-blue-200 border rounded-xl text-lg font-bold text-blue-700">
+‎                        <div class="mt-2 p-3 bg-gray-100 rounded-xl grid grid-cols-2 gap-2">
+‎                            <input id="calc-dist" type="number" placeholder="Km" class="p-2 text-xs border rounded-lg">
+‎                            <input id="calc-tarifa" type="number" placeholder="Tarifa" class="p-2 text-xs border rounded-lg">
+‎                            <button onclick="calcularPrecio()" class="col-span-2 bg-gray-700 text-white text-[10px] py-2 rounded-lg font-bold">CALCULAR PRECIO</button>
+‎                        </div>
+‎                    </div>
+‎                    <div class="md:col-span-2">
+‎                        <label class="block text-sm font-bold text-gray-700 mb-1">Origen</label>
+‎                        <input id="v-origen" type="text" class="w-full p-3 bg-gray-50 border rounded-xl mb-2">
+‎                        <div id="contenedor-paradas" class="space-y-2 mb-2"></div>
+‎                        <button onclick="añadirParada()" class="text-blue-600 text-xs font-bold"><i class="fas fa-plus-circle mr-1"></i> Añadir Parada Intermedia</button>
+‎                    </div>
+‎                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Destino</label><input id="v-destino" type="text" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
+‎                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Grupo WhatsApp</label><input id="v-grupo" type="text" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
+‎                    <div class="md:col-span-2 grid grid-cols-2 gap-3 py-2 text-xs font-bold">
+‎                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-transf"> <span>Transferencia</span></label>
+‎                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-precio-cli"> <span>Precio Cliente</span></label>
+‎                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-aire"> <span>Aire Acond.</span></label>
+‎                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-regreso"> <span>Ida y Vuelta</span></label>
+‎                    </div>
+‎                    <div class="md:col-span-2 border-t pt-4">
+‎                        <label class="flex items-center space-x-2 text-sm font-black cursor-pointer mb-3">
+‎                            <input type="checkbox" id="v-es-reserva" onchange="toggleReserva()" class="w-5 h-5"> <span>VIAJE RESERVADO</span>
+‎                        </label>
+‎                        <div id="zona-reserva" class="hidden grid grid-cols-2 gap-4"><input id="v-fecha" type="date" class="p-3 bg-blue-50 border rounded-xl"><input id="v-hora" type="time" class="p-3 bg-blue-50 border rounded-xl"></div>
+‎                    </div>
+‎                    <div class="md:col-span-2"><label class="block text-sm font-bold text-gray-700 mb-1">Observaciones</label><textarea id="v-obs" rows="2" class="w-full p-3 bg-gray-50 border rounded-xl"></textarea></div>
+‎                </div>
+‎                <div class="mt-8 grid grid-cols-2 gap-4">
+‎                    <button onclick="generarPlanillas()" class="bg-gray-800 text-white p-4 rounded-2xl font-black shadow-lg">PLANILLA</button>
+‎                    <button onclick="alert('Guardado con éxito (Próximamente en base de datos)')" class="bg-blue-600 text-white p-4 rounded-2xl font-black shadow-lg">CREAR VIAJE</button>
+‎                </div>
+‎            </div>
+‎        </main>
+‎    </div>
+‎
+‎    <div id="modal-planillas" class="fixed inset-0 bg-black/80 hidden z-[100] p-4 flex items-center justify-center overflow-y-auto">
+‎        <div class="bg-white w-full max-w-lg rounded-3xl p-6 relative">
+‎            <button onclick="cerrarModal()" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+‎            <div class="space-y-6">
+‎                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+‎                    <h4 class="text-blue-700 font-bold mb-2">Planilla Chofer</h4>
+‎                    <pre id="txt-chofer" class="text-[10px] whitespace-pre-wrap font-mono p-2 bg-white rounded border"></pre>
+‎                    <button onclick="enviarWhatsApp('chofer')" class="w-full mt-2 bg-green-500 text-white py-2 rounded-lg text-sm font-bold">Enviar WhatsApp</button>
+‎                </div>
+‎                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+‎                    <h4 class="text-green-700 font-bold mb-2">Planilla Cliente</h4>
+‎                    <pre id="txt-cliente" class="text-[10px] whitespace-pre-wrap font-mono p-2 bg-white rounded border"></pre>
+‎                    <button onclick="enviarWhatsApp('cliente')" class="w-full mt-2 bg-green-600 text-white py-2 rounded-lg text-sm font-bold">Enviar WhatsApp</button>
+‎                </div>
+‎            </div>
+‎        </div>
+‎    </div>
+‎
+‎    <script>
+‎        // CONFIGURACIÓN INICIAL
+‎        const tel = localStorage.getItem('userTel');
+‎        const rol = localStorage.getItem('userRole');
+‎        if (!tel) window.location.href = 'index.html';
+‎        document.getElementById('userTel').innerText = tel;
+‎        document.getElementById('userRoleBadge').innerText = rol === 'manager' ? 'Administrador' : 'Gestor';
+‎
+‎        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+‎        if(window.innerWidth > 1024) toggleMenu();
+‎
+‎        function mostrarSeccion(id) {
+‎            document.getElementById('section-dashboard').classList.add('hidden');
+‎            document.getElementById('section-crear-viaje').classList.add('hidden');
+‎            document.getElementById('section-' + id).classList.remove('hidden');
+‎            if(window.innerWidth < 1024) toggleMenu();
+‎        }
+‎
+‎        // LÓGICA CREAR VIAJE
+‎        function añadirParada() {
+‎            const input = document.createElement('input');
+‎            input.placeholder = "Parada intermedia...";
+‎            input.className = "w-full p-3 bg-yellow-50 border border-yellow-200 rounded-xl mb-2 text-sm";
+‎            document.getElementById('contenedor-paradas').appendChild(input);
+‎        }
+‎
+‎        function buscarChofer() {
+‎            const num = document.getElementById('v-chofer-tel').value;
+‎            if(num) {
+‎                document.getElementById('chofer-info').classList.remove('hidden');
+‎                document.getElementById('info-nombre').innerText = "Nombre: Chofer de prueba";
+‎                document.getElementById('info-fondo').innerText = "Fondo Actual: $500.00";
+‎            }
+‎        }
+‎
+‎        function calcularPrecio() {
+‎            const km = document.getElementById('calc-dist').value;
+‎            const t = document.getElementById('calc-tarifa').value;
+‎            if(km && t) document.getElementById('v-precio').value = km * t;
+‎        }
+‎
+‎        function toggleReserva() {
+‎            document.getElementById('zona-reserva').classList.toggle('hidden', !document.getElementById('v-es-reserva').checked);
+‎        }
+‎
+‎        function generarPlanillas() {
+‎            const p = document.getElementById('v-precio').value;
+‎            const c = document.getElementById('v-cliente').value;
+‎            const o = document.getElementById('v-origen').value;
+‎            const d = document.getElementById('v-destino').value;
+‎            const px = document.getElementById('v-pax').value || 1;
+‎
+‎            const pCh = `*DATOS DEL VIAJE*\nPrecio: ${p}\nCliente: ${c}\nOrigen: ${o}\nDestino: ${d}\nPax: ${px}\nFondo Actual: $500\n\n⚠️ IMPORTANTE ⚠️\n• 15 min máx. llegada.\n• 15 min cortesía espera. (Extra: 25 cup/min)\n• Tarde: descuento 50%.`;
+‎            const pCl = `*Taxi En Camino*\nPrecio: ${p}\nChofer: Prueba\nAuto: Estándar\n\n⚠️ *IMPORTANTE* ⚠️\n• Parada extra recalcula costo.\n• 10 min cortesía. (Extra: 25 cup/min).\n• Cancelar en origen: paga 50%.`;
+‎
+‎            document.getElementById('txt-chofer').innerText = pCh;
+‎            document.getElementById('txt-cliente').innerText = pCl;
+‎            document.getElementById('modal-planillas').classList.remove('hidden');
+‎        }
+‎
+‎        function enviarWhatsApp(tipo) {
+‎            const num = tipo === 'chofer' ? document.getElementById('v-chofer-tel').value : document.getElementById('v-cliente').value;
+‎            const msg = encodeURIComponent(tipo === 'chofer' ? document.getElementById('txt-chofer').innerText : document.getElementById('txt-cliente').innerText);
+‎            window.open(`https://wa.me/53${num}?text=${msg}`, '_blank');
+‎        }
+‎
+‎        function cerrarModal() { document.getElementById('modal-planillas').classList.add('hidden'); }
+‎
+‎        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+‎
+‎        // GRÁFICA INICIAL
+‎        const ctx = document.getElementById('viajesChart').getContext('2d');
+‎        new Chart(ctx, {
+‎            type: 'line',
+‎            data: { labels: ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'], datasets: [{ label: 'Viajes', data: [5, 10, 8, 15, 6, 20, 12], borderColor: '#1e5bb9', tension: 0.4 }] },
+‎            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+‎        });
+‎    </script>
+‎</body>
+‎</html>
+‎
