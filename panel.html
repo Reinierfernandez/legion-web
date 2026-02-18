@@ -3,430 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONGO MUSUNDI - Sistema de Gestión</title>
+    <title>CONGO MUSUNDI - Gestión de Transporte</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; overflow: hidden; }
-        .sidebar { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Tipografía específica para la marca solicitada */
+        .brand-font { font-weight: 900; font-size: 1.5rem; letter-spacing: -0.05em; color: #ffffff; }
+        
+        .sidebar { transition: width 0.3s ease; width: 0; overflow: hidden; }
         .sidebar.open { width: 280px; }
-        .active-link { background: #2563eb; color: white; border-radius: 12px; font-weight: 900; }
-        .tab-btn.active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 900; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        input, select, textarea { border-radius: 12px !important; }
+        
+        .active-nav { background: #2563eb; color: white !important; font-weight: 900; }
+        .tab-active { border-bottom: 4px solid #2563eb; color: #2563eb; font-weight: 900; }
+        
+        /* Scrollbar suave */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen flex">
+<body class="bg-slate-100 flex h-screen overflow-hidden">
 
-    <aside id="sidebar" class="sidebar fixed lg:relative z-50 h-screen bg-slate-900 text-slate-300 flex flex-col shadow-2xl">
+    <aside id="sidebar" class="sidebar fixed lg:relative z-50 h-full bg-slate-900 flex flex-col shadow-2xl">
         <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-            <h1 class="text-xl font-black text-white tracking-tighter">CONGO MUSUNDI</h1>
-            <button onclick="toggleMenu()" class="lg:hidden text-white"><i class="fas fa-times"></i></button>
+            <span class="brand-font italic">CONGO MUSUNDI</span>
+            <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-times"></i></button>
         </div>
-        <nav class="flex-1 overflow-y-auto p-4 space-y-1 text-sm">
-            <a href="#" onclick="showSec('dashboard')" id="link-dashboard" class="flex items-center p-3 hover:text-white transition-all"><i class="fas fa-th-large mr-3 w-5"></i> Panel de Control</a>
-            <a href="#" onclick="showSec('crear-viaje')" id="link-crear-viaje" class="flex items-center p-3 hover:text-white transition-all"><i class="fas fa-plus-circle mr-3 w-5"></i> Crear Viajes</a>
-            <a href="#" onclick="showSec('mis-viajes')" id="link-mis-viajes" class="flex items-center p-3 hover:text-white transition-all"><i class="fas fa-route mr-3 w-5"></i> Mis Viajes</a>
-            <a href="#" onclick="showSec('choferes')" id="link-choferes" class="flex items-center p-3 hover:text-white transition-all"><i class="fas fa-users mr-3 w-5"></i> Choferes</a>
-            <a href="#" onclick="showSec('filtrar-viajes')" id="link-filtrar-viajes" class="flex items-center p-3 hover:text-white transition-all"><i class="fas fa-filter mr-3 w-5"></i> Filtrar Viajes</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fas fa-clock mr-3 w-5"></i> Pagos Pendientes</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fas fa-check-double mr-3 w-5"></i> Pagos por Aprobar</a>
-            <a href="#" onclick="showSec('tarjetas')" id="link-tarjetas" class="flex items-center p-3 hover:text-white transition-all"><i class="fas fa-credit-card mr-3 w-5"></i> Tarjetas</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fas fa-exchange-alt mr-3 w-5"></i> Transferencias</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fas fa-handshake mr-3 w-5"></i> Colaboración</a>
-            <a href="#" onclick="showSec('usuarios')" id="link-usuarios" class="flex items-center p-3 hover:text-white transition-all"><i class="fas fa-user-shield mr-3 w-5"></i> Usuarios</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fas fa-wallet mr-3 w-5"></i> Economía</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fas fa-address-book mr-3 w-5"></i> Clientes</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fas fa-cog mr-3 w-5"></i> Configuración</a>
-            <a href="#" class="flex items-center p-3 text-slate-600 cursor-not-allowed"><i class="fab fa-whatsapp mr-3 w-5"></i> Api WhatsApp</a>
+        
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2 text-sm text-slate-400">
+            <a href="#" onclick="navTo('dashboard')" id="n-dashboard" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-chart-pie mr-3 w-5"></i> Panel de Control</a>
+            <a href="#" onclick="navTo('crear-viaje')" id="n-crear-viaje" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-plus-circle mr-3 w-5"></i> Crear Viajes</a>
+            <a href="#" onclick="navTo('mis-viajes')" id="n-mis-viajes" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-list-ul mr-3 w-5"></i> Mis Viajes</a>
+            <a href="#" onclick="navTo('choferes')" id="n-choferes" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-user-friends mr-3 w-5"></i> Choferes</a>
+            <a href="#" onclick="navTo('filtrar-viajes')" id="n-filtrar-viajes" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-search-plus mr-3 w-5"></i> Filtrar Viajes</a>
+            <a href="#" onclick="navTo('tarjetas')" id="n-tarjetas" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-credit-card mr-3 w-5"></i> Tarjetas</a>
+            <a href="#" onclick="navTo('usuarios')" id="n-usuarios" class="flex items-center p-3 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-id-badge mr-3 w-5"></i> Usuarios</a>
+            
+            <div class="pt-4 pb-2 px-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Próximamente</div>
+            <div class="space-y-1 opacity-50 cursor-not-allowed">
+                <div class="flex items-center p-3"><i class="fas fa-wallet mr-3 w-5"></i> Economía</div>
+                <div class="flex items-center p-3"><i class="fab fa-whatsapp mr-3 w-5"></i> Api WhatsApp</div>
+            </div>
         </nav>
-        <div class="p-4 border-t border-slate-800">
-            <button onclick="location.href='index.html'" class="w-full bg-red-500/10 text-red-500 p-3 rounded-xl font-bold text-xs uppercase hover:bg-red-500 hover:text-white transition-all">Cerrar Sesión</button>
+        
+        <div class="p-4 bg-slate-950">
+            <button onclick="location.reload()" class="w-full py-3 bg-red-600/20 text-red-500 rounded-xl font-bold text-xs uppercase">Cerrar Sesión</button>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header class="h-16 glass border-b flex items-center justify-between px-6 z-40">
-            <button onclick="toggleMenu()" class="text-slate-600 text-xl"><i class="fas fa-bars"></i></button>
-            <div class="flex items-center space-x-3">
-                <div class="text-right">
-                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest" id="rolDisplay">Administrador</p>
-                    <p class="text-sm font-bold text-slate-700" id="telDisplay">55555555</p>
+    <main class="flex-1 flex flex-col min-w-0">
+        <header class="h-16 bg-white border-b flex items-center justify-between px-6">
+            <button onclick="toggleSidebar()" class="text-slate-500 text-xl"><i class="fas fa-bars"></i></button>
+            <div class="flex items-center gap-3">
+                <div class="text-right leading-none">
+                    <p class="text-[10px] font-black text-slate-400 uppercase">Administrador</p>
+                    <p class="text-sm font-bold text-slate-700">5355555555</p>
                 </div>
                 <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-black">A</div>
             </div>
         </header>
 
-        <section id="content-area" class="flex-1 overflow-y-auto p-4 lg:p-8">
+        <div id="main-scroll" class="flex-1 overflow-y-auto p-4 lg:p-8">
             
-            <div id="sec-dashboard" class="space-y-8 animate-in fade-in duration-500">
+            <div id="sec-dashboard" class="content-section space-y-8 animate-in fade-in duration-500">
                 <h2 class="text-3xl font-black italic tracking-tighter">Panel de Control</h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-[2rem] shadow-sm border">
-                        <h3 class="font-black text-slate-400 uppercase text-xs mb-4">Viajes Recientes</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
-                                <thead class="border-b">
-                                    <tr class="text-slate-400 font-bold"><th class="pb-3">Chofer</th><th class="pb-3">Precio</th><th class="pb-3">Origen</th></tr>
-                                </thead>
-                                <tbody id="tab-recientes">
-                                    <tr class="border-b"><td class="py-3 font-bold">Mario López</td><td class="py-3 text-green-600 font-black">$1500</td><td class="py-3 italic">Habana Vieja</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <h3 class="font-black text-slate-400 uppercase text-xs mb-4 italic">Viajes Recientes</h3>
+                        <table class="w-full text-left text-sm">
+                            <thead><tr class="text-slate-400 border-b"><th class="pb-2">Chofer</th><th class="pb-2">Precio</th><th class="pb-2">Origen</th></tr></thead>
+                            <tbody id="dash-recientes">
+                                <tr><td class="py-3 font-bold">Mario López</td><td class="py-3 font-black text-blue-600">$1,500</td><td class="py-3 italic">Vedado</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="bg-white p-6 rounded-[2rem] shadow-sm border h-80">
-                        <h3 class="font-black text-slate-400 uppercase text-xs mb-4">Viajes Diarios</h3>
-                        <canvas id="chartViajes"></canvas>
+                        <h3 class="font-black text-slate-400 uppercase text-xs mb-4 italic">Viajes Diarios</h3>
+                        <canvas id="chart-diario"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div id="sec-crear-viaje" class="hidden max-w-4xl mx-auto bg-white p-8 rounded-[2.5rem] shadow-xl border border-blue-50">
-                <h2 class="text-2xl font-black mb-8 flex items-center"><i class="fas fa-plus-circle text-blue-600 mr-3"></i> Elaborar Viaje</h2>
+            <div id="sec-crear-viaje" class="content-section hidden max-w-4xl mx-auto bg-white p-8 rounded-[3rem] shadow-xl border">
+                <h2 class="text-2xl font-black mb-8 italic"><i class="fas fa-plus-circle text-blue-600 mr-2"></i> Elaborar Viaje</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-xs font-black uppercase text-slate-400 mb-2">Colaboración</label>
-                        <select id="v-colab" class="w-full p-4 bg-slate-50 border-0 ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"><option>Ninguna</option><option>Colaboración X</option></select>
+                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Colaboración</label>
+                        <select class="w-full p-4 bg-slate-50 rounded-2xl border-0 ring-1 ring-slate-200"><option>Ninguna</option></select>
                     </div>
                     <div>
-                        <label class="block text-xs font-black uppercase text-slate-400 mb-2">Chofer (Búsqueda)</label>
-                        <div class="flex space-x-2">
-                            <input id="v-ch-tel" type="tel" placeholder="Número de teléfono" class="flex-1 p-4 bg-slate-50 border-0 ring-1 ring-slate-200 outline-none">
-                            <button onclick="buscarCh()" class="bg-blue-600 text-white px-5 rounded-xl shadow-lg hover:bg-blue-700"><i class="fas fa-search"></i></button>
+                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Chofer (Búsqueda)</label>
+                        <div class="flex gap-2">
+                            <input id="v-search-ch" type="tel" placeholder="Teléfono" class="flex-1 p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200 outline-none">
+                            <button onclick="buscarSimulado()" class="bg-blue-600 text-white px-5 rounded-2xl"><i class="fas fa-search"></i></button>
                         </div>
-                        <div id="ch-box" class="mt-3 p-4 bg-blue-50 rounded-2xl hidden animate-pulse">
-                            <p class="text-[10px] font-black text-blue-400 uppercase">Resultado:</p>
-                            <p id="ch-res-nom" class="text-sm font-black text-blue-900"></p>
-                            <p id="ch-res-auto" class="text-xs text-blue-700"></p>
-                            <p id="ch-res-fondo" class="text-sm font-black text-green-600 mt-1"></p>
+                        <div id="res-busqueda" class="hidden mt-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                            <p id="res-nombre" class="font-black text-blue-900"></p>
+                            <p id="res-auto" class="text-xs text-blue-700 italic"></p>
+                            <p id="res-fondo" class="text-sm font-black text-green-600 mt-1"></p>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-black uppercase text-slate-400 mb-2">Cliente (Tel)</label><input id="v-cli" type="tel" class="w-full p-4 bg-slate-50 ring-1 ring-slate-200 outline-none"></div>
-                        <div><label class="block text-xs font-black uppercase text-slate-400 mb-2">Pax</label><input id="v-pax" type="number" value="1" class="w-full p-4 bg-slate-50 ring-1 ring-slate-200 text-center font-bold"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-black uppercase text-slate-400 mb-2">Precio Viaje</label>
-                        <input id="v-precio" type="number" class="w-full p-4 bg-blue-50 ring-2 ring-blue-100 text-xl font-black text-blue-600 outline-none">
-                        <div class="mt-3 p-4 bg-slate-50 rounded-2xl grid grid-cols-2 gap-2 border border-slate-200">
-                            <input id="calc-km" type="number" placeholder="KM" class="p-2 text-xs border bg-white">
-                            <input id="calc-t" type="number" placeholder="Tarifa" class="p-2 text-xs border bg-white">
-                            <button onclick="doCalc()" class="col-span-2 bg-slate-800 text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Calcular Precio</button>
+                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Precio ($)</label>
+                        <input id="v-precio" type="number" class="w-full p-4 bg-blue-50 rounded-2xl ring-2 ring-blue-200 text-2xl font-black text-blue-700">
+                        <div class="mt-2 flex gap-2">
+                            <input id="c-km" type="number" placeholder="KM" class="w-1/2 p-2 text-xs border rounded-lg">
+                            <input id="c-t" type="number" placeholder="Tarifa" class="w-1/2 p-2 text-xs border rounded-lg">
+                            <button onclick="calcPrecio()" class="bg-slate-800 text-white px-3 rounded-lg text-[10px] font-black">CALC</button>
                         </div>
                     </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Pasajeros (Pax)</label>
+                        <input type="number" value="1" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200 font-bold">
+                    </div>
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-black uppercase text-slate-400 mb-2">Origen</label>
-                        <input id="v-ori" type="text" class="w-full p-4 bg-slate-50 ring-1 ring-slate-200 outline-none mb-2">
-                        <div id="paradas-cont" class="space-y-2 mb-2"></div>
-                        <button onclick="addP()" class="text-blue-600 text-[10px] font-black uppercase tracking-widest"><i class="fas fa-plus-circle mr-1"></i> Añadir Parada Intermedia</button>
+                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Origen</label>
+                        <input id="v-origen" type="text" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200 mb-2">
+                        <div id="cont-paradas" class="space-y-2 mb-2"></div>
+                        <button onclick="nuevaParada()" class="text-blue-600 text-[10px] font-black uppercase tracking-widest">+ Añadir Parada</button>
                     </div>
-                    <div><label class="block text-xs font-black uppercase text-slate-400 mb-2">Destino</label><input id="v-dest" type="text" class="w-full p-4 bg-slate-50 ring-1 ring-slate-200 outline-none"></div>
-                    <div><label class="block text-xs font-black uppercase text-slate-400 mb-2">Grupo WhatsApp</label><input id="v-grp" type="text" class="w-full p-4 bg-slate-50 ring-1 ring-slate-200 outline-none"></div>
-                    
-                    <div class="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y border-slate-100">
-                        <label class="flex items-center text-[10px] font-black text-slate-500 uppercase cursor-pointer"><input type="checkbox" id="v-tr" class="mr-2 w-4 h-4 rounded"> Transferencia</label>
-                        <label class="flex items-center text-[10px] font-black text-slate-500 uppercase cursor-pointer"><input type="checkbox" id="v-pc" class="mr-2 w-4 h-4 rounded"> Precio Cliente</label>
-                        <label class="flex items-center text-[10px] font-black text-slate-500 uppercase cursor-pointer"><input type="checkbox" id="v-ac" class="mr-2 w-4 h-4 rounded text-blue-500"> Aire Acond.</label>
-                        <label class="flex items-center text-[10px] font-black text-slate-500 uppercase cursor-pointer"><input type="checkbox" id="v-iv" class="mr-2 w-4 h-4 rounded"> Ida y Vuelta</label>
+                    <div class="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y text-[10px] font-black uppercase">
+                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Transferencia</label>
+                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Aire Acond.</label>
+                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Precio Cliente</label>
+                        <label class="flex items-center"><input type="checkbox" id="check-reserva" onchange="toggleReservado()"> RESERVADO</label>
                     </div>
-
-                    <div class="md:col-span-2 py-2">
-                        <label class="flex items-center text-sm font-black text-blue-600 uppercase cursor-pointer mb-3">
-                            <input type="checkbox" id="v-res" onchange="toggleRes()" class="mr-2 w-5 h-5 rounded"> Viaje Reservado
-                        </label>
-                        <div id="res-box" class="hidden grid grid-cols-2 gap-4">
-                            <input id="v-fec" type="date" class="p-4 bg-blue-50 ring-1 ring-blue-200 outline-none">
-                            <input id="v-hor" type="time" class="p-4 bg-blue-50 ring-1 ring-blue-200 outline-none">
-                        </div>
+                    <div id="box-reserva" class="hidden md:col-span-2 grid grid-cols-2 gap-4">
+                        <input type="date" class="p-4 bg-blue-50 rounded-2xl border-0 ring-1 ring-blue-200">
+                        <input type="time" class="p-4 bg-blue-50 rounded-2xl border-0 ring-1 ring-blue-200">
                     </div>
-
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-black uppercase text-slate-400 mb-2">Observación (Equipaje, etc.)</label>
-                        <textarea id="v-obs" rows="3" class="w-full p-4 bg-slate-50 ring-1 ring-slate-200 outline-none"></textarea>
+                        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Observaciones</label>
+                        <textarea rows="3" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200"></textarea>
                     </div>
                 </div>
                 <div class="mt-10 grid grid-cols-2 gap-4">
-                    <button onclick="openPlanilla()" class="bg-slate-900 text-white p-5 rounded-2xl font-black text-sm uppercase shadow-2xl hover:bg-black transition-all">Planilla</button>
-                    <button onclick="alert('Viaje Registrado en Sistema')" class="bg-blue-600 text-white p-5 rounded-2xl font-black text-sm uppercase shadow-2xl hover:bg-blue-700 transition-all">Crear Viaje</button>
+                    <button onclick="verPlanilla()" class="bg-slate-900 text-white p-5 rounded-2xl font-black uppercase shadow-xl">Planilla</button>
+                    <button class="bg-blue-600 text-white p-5 rounded-2xl font-black uppercase shadow-xl">Crear Viaje</button>
                 </div>
             </div>
 
-            <div id="sec-choferes" class="hidden space-y-6">
+            <div id="sec-choferes" class="content-section hidden space-y-6">
                 <div class="flex justify-between items-center">
                     <h2 class="text-3xl font-black italic tracking-tighter">Choferes</h2>
-                    <button class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg">+ Añadir</button>
                 </div>
-                <div id="grid-ch" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    <div class="bg-white p-6 rounded-[2rem] border shadow-sm flex justify-between items-center hover:shadow-md transition-all">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 font-black">CH</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-white p-6 rounded-[2.5rem] border shadow-sm flex justify-between items-center relative">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 text-2xl"><i class="fas fa-user"></i></div>
                             <div>
-                                <p class="font-black text-slate-800 leading-none mb-1">MARIO LÓPEZ</p>
-                                <p class="text-xs text-slate-400 font-bold">55555555</p>
-                                <div class="flex space-x-2 mt-2">
-                                    <span class="text-[9px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-black uppercase">Lic: SI</span>
-                                    <span class="text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-black uppercase">$1,250.00</span>
-                                </div>
+                                <p class="font-black text-slate-800 uppercase italic">Mario López</p>
+                                <p class="text-xs text-slate-400 font-bold">5355555555</p>
+                                <p class="text-[10px] font-black text-green-600 mt-1 uppercase">$1,250.00 Fondo</p>
                             </div>
                         </div>
-                        <div class="relative">
-                            <button onclick="toggleDrop('dr-ch-1')" class="p-2 text-slate-300 hover:text-slate-600"><i class="fas fa-ellipsis-v"></i></button>
-                            <div id="dr-ch-1" class="hidden absolute right-0 top-10 w-32 bg-white shadow-2xl border rounded-2xl z-20 overflow-hidden font-black text-[10px] uppercase">
-                                <button onclick="viewPerfil()" class="w-full p-4 text-left hover:bg-slate-50 border-b">Ver</button>
-                                <button onclick="confirm('¿Eliminar Chofer?')" class="w-full p-4 text-left hover:bg-red-50 text-red-500">Eliminar</button>
-                            </div>
+                        <button onclick="toggleDrop('dr-ch-1')" class="text-slate-300 p-2"><i class="fas fa-ellipsis-v"></i></button>
+                        <div id="dr-ch-1" class="hidden absolute right-6 top-16 bg-white border shadow-2xl rounded-2xl w-32 z-10 overflow-hidden font-black text-[10px] uppercase">
+                            <button onclick="navTo('perfil-detalle')" class="w-full p-4 text-left hover:bg-slate-50 border-b">Ver</button>
+                            <button onclick="confirm('¿Eliminar Chofer?')" class="w-full p-4 text-left hover:bg-red-50 text-red-500">Eliminar</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="sec-perfil-ch" class="hidden space-y-8 animate-in slide-in-from-right duration-300">
-                <button onclick="showSec('choferes')" class="text-blue-600 font-black text-xs uppercase flex items-center"><i class="fas fa-arrow-left mr-2"></i> Volver a Choferes</button>
-                <div class="bg-white rounded-[3rem] shadow-2xl p-8 max-w-4xl mx-auto border-t-8 border-blue-600">
-                    <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8">
-                        <div class="w-48 h-56 bg-slate-100 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-xl flex items-center justify-center italic text-slate-300">
-                            <i class="fas fa-user text-6xl"></i>
+            <div id="sec-perfil-detalle" class="content-section hidden space-y-8">
+                <button onclick="navTo('choferes')" class="text-blue-600 font-black text-xs uppercase italic"><i class="fas fa-arrow-left mr-2"></i> Volver a Choferes</button>
+                <div class="bg-white rounded-[3.5rem] p-10 shadow-2xl border-t-8 border-blue-600">
+                    <div class="flex flex-col md:flex-row gap-10 items-center md:items-start">
+                        <div class="w-56 h-64 bg-slate-100 rounded-[3rem] border-8 border-white shadow-xl flex items-center justify-center italic text-slate-300 text-6xl">
+                            <i class="fas fa-camera"></i>
                         </div>
                         <div class="flex-1 text-center md:text-left">
-                            <h3 class="text-3xl font-black text-slate-800 tracking-tighter">MARIO LÓPEZ</h3>
-                            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div class="bg-slate-50 p-4 rounded-3xl text-center"><p class="text-[9px] font-black text-slate-400 uppercase">Fondo Actual</p><p class="text-lg font-black text-green-600">$1,250</p></div>
-                                <div class="bg-slate-50 p-4 rounded-3xl text-center"><p class="text-[9px] font-black text-slate-400 uppercase">Viajes Hoy</p><p class="text-lg font-black text-blue-600">0</p></div>
-                                <div class="bg-slate-50 p-4 rounded-3xl text-center"><p class="text-[9px] font-black text-slate-400 uppercase">Viajes Mes</p><p class="text-lg font-black">14</p></div>
-                                <div class="bg-slate-50 p-4 rounded-3xl text-center"><p class="text-[9px] font-black text-slate-400 uppercase">Total</p><p class="text-lg font-black">240</p></div>
-                            </div>
-                            <div class="mt-6 flex flex-wrap gap-4 justify-center md:justify-start text-[10px] font-black uppercase">
-                                <label class="flex items-center"><input type="checkbox" class="mr-2"> Trabajar sin créditos</label>
-                                <div class="flex items-center space-x-3 bg-slate-50 px-4 py-2 rounded-full">
-                                    <span>Grupo:</span>
-                                    <label><input type="radio" name="gr"> A</label>
-                                    <label><input type="radio" name="gr"> B</label>
+                            <h3 class="text-4xl font-black italic tracking-tighter">MARIO LÓPEZ</h3>
+                            <div class="mt-6 flex flex-wrap gap-4 justify-center md:justify-start">
+                                <div class="bg-slate-50 px-6 py-4 rounded-3xl text-center shadow-inner">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase">Fondo Actual</p>
+                                    <p class="text-xl font-black text-green-600">$1,250.00</p>
                                 </div>
+                                <div class="bg-slate-50 px-6 py-4 rounded-3xl text-center shadow-inner">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase">Hoy</p>
+                                    <p class="text-xl font-black text-blue-600">0</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex gap-6 text-[11px] font-black uppercase text-slate-500">
+                                <label class="flex items-center"><input type="checkbox" class="mr-2"> Trabajar sin Créditos</label>
+                                <div class="flex items-center gap-3">Grupo: <label><input type="radio" name="g"> A</label> <label><input type="radio" name="g"> B</label></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-8 flex space-x-3">
-                        <button class="flex-1 bg-slate-100 py-4 rounded-2xl font-black text-[10px] uppercase shadow-inner">Filtrar Viajes</button>
-                        <button class="flex-1 bg-green-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-green-200">WhatsApp</button>
-                        <button class="flex-1 bg-red-100 text-red-600 py-4 rounded-2xl font-black text-[10px] uppercase">Eliminar</button>
+                    <div class="grid grid-cols-3 gap-3 mt-10">
+                        <button class="bg-slate-100 py-4 rounded-2xl font-black text-[10px] uppercase">Filtrar Viajes</button>
+                        <button class="bg-green-600 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-green-100">WhatsApp</button>
+                        <button class="bg-red-100 text-red-600 py-4 rounded-2xl font-black text-[10px] uppercase">Eliminar</button>
                     </div>
 
                     <div class="mt-12">
-                        <div class="flex border-b border-slate-100 overflow-x-auto text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <button onclick="tabCh('info')" id="tb-info" class="p-4 tab-btn active">Información</button>
-                            <button onclick="tabCh('auto')" id="tb-auto" class="p-4 tab-btn">Auto</button>
-                            <button onclick="tabCh('fondo')" id="tb-fondo" class="p-4 tab-btn">Fondo</button>
+                        <div class="flex border-b text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <button onclick="tabInternal('info')" id="tab-info" class="p-4 tab-active">Información</button>
+                            <button onclick="tabInternal('auto')" id="tab-auto" class="p-4">Auto</button>
+                            <button onclick="tabInternal('fondo')" id="tab-fondo" class="p-4">Fondo</button>
                         </div>
-                        <div id="ch-tab-content" class="py-8 min-h-[300px]"></div>
+                        <div id="cont-tab-perfil" class="py-8 min-h-[300px]">
+                            </div>
                     </div>
                 </div>
             </div>
 
-            <div id="sec-tarjetas" class="hidden space-y-6">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-3xl font-black italic tracking-tighter">Tarjetas</h2>
-                    <button class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase">+ Nueva Tarjeta</button>
-                </div>
-                <div class="bg-white rounded-[2rem] overflow-hidden border shadow-sm max-w-2xl mx-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-400 font-black text-[10px] uppercase">
-                            <tr><th class="p-5">Número</th><th class="p-5">Nombre</th><th class="p-5 text-right">Acción</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-t font-bold">
-                                <td class="p-5 tracking-widest">9205 XXXX XXXX</td>
-                                <td class="p-5">MARIO PÉREZ</td>
-                                <td class="p-5 text-right"><button class="text-red-500"><i class="fas fa-trash"></i></button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="sec-usuarios" class="hidden space-y-6">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-3xl font-black italic tracking-tighter">Usuarios</h2>
-                    <button onclick="openAddUser()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest">Añadir Usuario</button>
-                </div>
-                <div id="grid-users" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-[2.5rem] border shadow-sm relative text-center">
-                        <button onclick="toggleDrop('dr-u-1')" class="absolute top-6 right-6 text-slate-300"><i class="fas fa-ellipsis-v"></i></button>
-                        <div id="dr-u-1" class="hidden absolute top-12 right-6 bg-white border shadow-2xl rounded-2xl w-32 z-10 font-black text-[10px] uppercase overflow-hidden">
-                            <button class="w-full p-4 text-left hover:bg-slate-50 border-b">Ver</button>
-                            <button onclick="delUserPrompt()" class="w-full p-4 text-left hover:bg-red-50 text-red-500">Eliminar</button>
-                        </div>
-                        <div class="w-24 h-24 bg-blue-50 rounded-full mx-auto mb-4 flex items-center justify-center text-blue-600 text-3xl font-black">A</div>
-                        <h4 class="font-black text-slate-800 uppercase italic">Admin Principal</h4>
-                        <p class="text-[10px] font-bold text-slate-400 mt-1">ADMINISTRADOR</p>
-                        <p class="text-xs font-bold text-blue-600 mt-3 tracking-tighter">55555555</p>
+            <div id="sec-filtrar-viajes" class="content-section hidden max-w-2xl mx-auto bg-white p-10 rounded-[3rem] shadow-xl border">
+                <h2 class="text-2xl font-black italic mb-8">Filtrar Historial</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Dato a buscar</label>
+                        <input type="text" placeholder="Ej: Nombre o Teléfono" class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Tipo de Filtro</label>
+                        <select class="w-full p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-200">
+                            <option>Fecha</option><option>Desde-Hasta</option><option>Mes</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-4 pt-6">
+                        <button onclick="navTo('dashboard')" class="flex-1 py-4 bg-slate-100 rounded-2xl font-black text-xs uppercase">Cancelar</button>
+                        <button class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">Filtrar</button>
                     </div>
                 </div>
             </div>
 
-        </section>
+        </div>
     </main>
 
-    <div id="mod-planilla" class="fixed inset-0 bg-slate-900/90 hidden z-[100] flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white w-full max-w-xl rounded-[3rem] p-8 relative shadow-2xl">
-            <button onclick="document.getElementById('mod-planilla').classList.add('hidden')" class="absolute top-6 right-8 text-2xl text-slate-400 hover:text-black">&times;</button>
-            <div class="space-y-8">
-                <div>
-                    <h5 class="font-black text-xs text-blue-600 uppercase mb-4 tracking-widest">Planilla para el Chofer</h5>
-                    <pre id="pre-ch" class="bg-slate-50 p-5 rounded-3xl text-[10px] font-mono whitespace-pre-wrap border border-slate-100"></pre>
-                    <button onclick="wa('ch')" class="w-full mt-4 bg-green-500 text-white py-4 rounded-2xl font-black text-xs uppercase shadow-lg shadow-green-100 flex items-center justify-center"><i class="fab fa-whatsapp mr-2 text-lg"></i> Enviar a Chofer</button>
+    <div id="mod-fondos" class="fixed inset-0 bg-slate-900/80 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-[3rem] p-8 shadow-2xl text-center">
+            <h4 id="f-modal-tit" class="text-2xl font-black italic mb-6 uppercase">Agregar</h4>
+            <div class="space-y-4">
+                <div id="box-metodo">
+                    <label class="text-[10px] font-black uppercase text-slate-400">Método</label>
+                    <select id="f-met" class="w-full p-4 bg-slate-50 rounded-2xl font-bold"><option>Efectivo</option><option>Transferencia</option></select>
                 </div>
                 <div>
-                    <h5 class="font-black text-xs text-green-600 uppercase mb-4 tracking-widest">Planilla para el Cliente</h5>
-                    <pre id="pre-cl" class="bg-slate-50 p-5 rounded-3xl text-[10px] font-mono whitespace-pre-wrap border border-slate-100"></pre>
-                    <button onclick="wa('cl')" class="w-full mt-4 bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase shadow-lg flex items-center justify-center"><i class="fab fa-whatsapp mr-2 text-lg"></i> Enviar a Cliente</button>
+                    <label class="text-[10px] font-black uppercase text-slate-400">Cantidad ($)</label>
+                    <input id="f-cant" type="number" class="w-full p-4 bg-slate-50 rounded-2xl text-2xl font-black text-blue-600 text-center">
                 </div>
+                <button onclick="procesarAccionFondo()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg">Procesar</button>
+                <button onclick="document.getElementById('mod-fondos').classList.add('hidden')" class="text-slate-400 text-[10px] font-black uppercase">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <div id="mod-fondo" class="fixed inset-0 bg-slate-900/60 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl text-center">
-            <h4 id="f-tit" class="text-2xl font-black tracking-tighter italic mb-8 uppercase">Agregar</h4>
+    <div id="mod-planilla" class="fixed inset-0 bg-slate-900/90 hidden z-[100] flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-xl rounded-[3rem] p-8 relative">
+            <button onclick="document.getElementById('mod-planilla').classList.add('hidden')" class="absolute top-6 right-8 text-2xl">&times;</button>
             <div class="space-y-6">
-                <div id="f-met-box">
-                    <label class="text-[10px] font-black text-slate-400 uppercase">Método</label>
-                    <select id="f-met" class="w-full p-4 bg-slate-50 font-bold border-0 ring-1 ring-slate-100"><option>Efectivo</option><option>Transferencia</option></select>
+                <div>
+                    <h5 class="text-[10px] font-black uppercase text-blue-600 mb-2">Planilla para el Chofer</h5>
+                    <pre id="txt-ch" class="bg-slate-50 p-5 rounded-3xl text-[10px] font-mono whitespace-pre-wrap border"></pre>
+                    <button class="w-full mt-3 bg-green-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-green-100"><i class="fab fa-whatsapp mr-2"></i> WhatsApp Chofer</button>
                 </div>
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase">Cantidad ($)</label>
-                    <input id="f-cant" type="number" class="w-full p-4 bg-slate-50 text-3xl font-black text-blue-600 text-center outline-none ring-1 ring-blue-100">
+                    <h5 class="text-[10px] font-black uppercase text-green-600 mb-2">Planilla para el Cliente</h5>
+                    <pre id="txt-cl" class="bg-slate-50 p-5 rounded-3xl text-[10px] font-mono whitespace-pre-wrap border"></pre>
+                    <button class="w-full mt-3 bg-slate-900 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg"><i class="fab fa-whatsapp mr-2"></i> WhatsApp Cliente</button>
                 </div>
-                <button onclick="procF()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-black uppercase shadow-xl hover:scale-105 transition-all">Procesar Orden</button>
-                <button onclick="document.getElementById('mod-fondo').classList.add('hidden')" class="w-full text-slate-400 font-black text-[10px] uppercase">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
         // --- NAVEGACIÓN ---
-        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
-        if(window.innerWidth > 1024) toggleMenu();
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        if(window.innerWidth > 1024) toggleSidebar();
 
-        function showSec(id) {
-            const secs = ['dashboard', 'crear-viaje', 'mis-viajes', 'choferes', 'perfil-ch', 'tarjetas', 'usuarios'];
-            secs.forEach(s => document.getElementById('sec-'+s).classList.add('hidden'));
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active-link'));
+        function navTo(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active-nav'));
             
-            document.getElementById('sec-'+id).classList.remove('hidden');
-            if(document.getElementById('link-'+id)) document.getElementById('link-'+id).classList.add('active-link');
-            if(window.innerWidth < 1024 && id !== 'perfil-ch') toggleMenu();
+            document.getElementById('sec-' + id).classList.remove('hidden');
+            if(document.getElementById('n-' + id)) document.getElementById('n-' + id).classList.add('active-nav');
+            
+            if(window.innerWidth < 1024 && id !== 'perfil-detalle') toggleSidebar();
+            document.getElementById('main-scroll').scrollTop = 0;
+            if(id === 'perfil-detalle') tabInternal('info');
         }
-        showSec('dashboard');
 
         function toggleDrop(id) { document.getElementById(id).classList.toggle('hidden'); }
 
-        // --- LÓGICA CREAR VIAJE ---
-        function addP() {
-            const i = document.createElement('input');
-            i.placeholder = "Indique la parada...";
-            i.className = "w-full p-4 bg-yellow-50/50 border-0 ring-1 ring-yellow-100 outline-none text-sm italic mb-2";
-            document.getElementById('paradas-cont').appendChild(i);
+        // --- CREAR VIAJE ---
+        function buscarSimulado() {
+            document.getElementById('res-busqueda').classList.remove('hidden');
+            document.getElementById('res-nombre').innerText = "MARIO LÓPEZ PÉREZ";
+            document.getElementById('res-auto').innerText = "Hyundai i10 • Gris • P123456";
+            document.getElementById('res-fondo').innerText = "Fondo Actual: $1,250.00";
         }
-
-        function buscarCh() {
-            const b = document.getElementById('ch-box');
-            b.classList.remove('hidden');
-            document.getElementById('ch-res-nom').innerText = "MARIO LÓPEZ PÉREZ";
-            document.getElementById('ch-res-auto').innerText = "Hyundai i10 • Gris • P123456";
-            document.getElementById('ch-res-fondo').innerText = "Fondo Actual: $1,250.00";
-        }
-
-        function doCalc() {
-            const km = document.getElementById('calc-km').value;
-            const t = document.getElementById('calc-t').value;
+        function calcPrecio() {
+            const km = document.getElementById('c-km').value;
+            const t = document.getElementById('c-t').value;
             if(km && t) document.getElementById('v-precio').value = km * t;
         }
-
-        function toggleRes() {
-            document.getElementById('res-box').classList.toggle('hidden', !document.getElementById('v-res').checked);
+        function nuevaParada() {
+            const i = document.createElement('input');
+            i.className = "w-full p-4 bg-yellow-50 rounded-2xl border-0 ring-1 ring-yellow-100 text-sm italic mb-2";
+            i.placeholder = "Indique parada intermedia...";
+            document.getElementById('cont-paradas').appendChild(i);
         }
+        function toggleReservado() {
+            document.getElementById('box-reserva').classList.toggle('hidden', !document.getElementById('check-reserva').checked);
+        }
+        function verPlanilla() {
+            const preCh = document.getElementById('txt-ch');
+            const preCl = document.getElementById('txt-cl');
+            const p = document.getElementById('v-precio').value;
+            const o = document.getElementById('v-origen').value;
 
-        function openPlanilla() {
-            const preCh = document.getElementById('pre-ch');
-            const preCl = document.getElementById('pre-cl');
-            const val = {
-                p: document.getElementById('v-precio').value,
-                c: document.getElementById('v-cli').value,
-                o: document.getElementById('v-ori').value,
-                d: document.getElementById('v-dest').value,
-                px: document.getElementById('v-pax').value
-            };
-
-            preCh.innerText = `*DATOS DEL VIAJE*\nPrecio: ${val.p}\nCliente: ${val.c}\nOrigen: ${val.o}\nDestino: ${val.d}\nPax: ${val.px}\nFondo Actual: $1,250\n\n⚠️ IMPORTANTE ⚠️\n• 15 min máximo llegada.\n• 15 min abordaje (Extra 25cup/min).\n• Tarde programado: -50% precio.\n• Mantenga el auto limpio.`;
-            preCl.innerText = `*Taxi En Camino*\nPrecio: ${val.p}\nChofer: Mario\nAuto: Hyundai\nColor: Gris\n\n⚠️ *IMPORTANTE* ⚠️\n• Parada extra recalcula ruta.\n• 10min de espera cortesía.\n• Espera extra: 25cup/min.\n• Cancelar en lugar: 50% costo.`;
-            
+            preCh.innerText = `*DATOS DEL VIAJE*\nPrecio: ${p}\nOrigen: ${o}\nFondo Actual: $1,250\n\n⚠️ IMPORTANTE ⚠️\n• 15 min máximo llegada.\n• 15 min abordaje cortesía.`;
+            preCl.innerText = `*Taxi En Camino*\nPrecio: ${p}\nChofer: Mario\nAuto: Hyundai\n\n⚠️ *IMPORTANTE* ⚠️\n• Parada extra recalcula costo.`;
             document.getElementById('mod-planilla').classList.remove('hidden');
         }
 
-        function wa(tipo) {
-            const n = tipo === 'ch' ? document.getElementById('v-ch-tel').value : document.getElementById('v-cli').value;
-            const t = encodeURIComponent(document.getElementById(tipo === 'ch' ? 'pre-ch' : 'pre-cl').innerText);
-            window.open(`https://wa.me/53${n}?text=${t}`, '_blank');
-        }
+        // --- TABS PERFIL CHOFER ---
+        function tabInternal(type) {
+            document.querySelectorAll('[id^="tab-"]').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById('tab-' + type).classList.add('tab-active');
+            const cont = document.getElementById('cont-tab-perfil');
 
-        // --- LÓGICA CHOFERES & FONDOS ---
-        function viewPerfil() { showSec('perfil-ch'); tabCh('info'); }
-
-        function tabCh(t) {
-            const c = document.getElementById('ch-tab-content');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tb-'+t).classList.add('active');
-
-            if(t==='info') c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm font-bold uppercase italic text-slate-400"><div>Nombre <p class="text-slate-800 text-lg not-italic mt-1">Mario</p></div><div>Apellidos <p class="text-slate-800 text-lg not-italic mt-1">López Pérez</p></div><div>Teléfono <p class="text-blue-600 text-lg not-italic mt-1">55555555</p></div></div>`;
-            if(t==='auto') c.innerHTML = `<div class="space-y-6"><div class="w-full h-48 bg-slate-50 rounded-[2rem] border-2 border-dashed flex items-center justify-center text-slate-300 font-black italic">Foto del Vehículo</div><div class="grid grid-cols-3 gap-4 text-[10px] font-black uppercase tracking-widest"><div>Marca<p class="text-slate-800 text-sm">Hyundai</p></div><div>Modelo<p class="text-slate-800 text-sm">i10</p></div><div>Color<p class="text-slate-800 text-sm">Gris</p></div></div><div class="flex space-x-6 pt-4"><label class="flex items-center text-[10px] font-black uppercase"><input type="checkbox" checked disabled class="mr-2"> Aire</label><label class="flex items-center text-[10px] font-black uppercase"><input type="checkbox" checked disabled class="mr-2"> Lic. Operativa</label></div></div>`;
-            if(t==='fondo') c.innerHTML = `
-                <div class="flex space-x-3 mb-6">
-                    <button onclick="openF('AGREGAR')" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase shadow-lg shadow-blue-100">Agregar</button>
-                    <button onclick="openF('RETIRAR')" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase">Retirar</button>
-                    <button onclick="alert('Fondos rectificados correctamente')" class="bg-amber-500 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase">Rectificar</button>
+            if(type === 'info') {
+                cont.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-black uppercase italic text-slate-400">
+                    <div>Nombre <p class="text-slate-800 text-lg not-italic mt-1">Mario</p></div>
+                    <div>Apellidos <p class="text-slate-800 text-lg not-italic mt-1">López Pérez</p></div>
+                    <div>Teléfono <p class="text-blue-600 text-lg not-italic mt-1">5355555555</p></div>
+                </div>`;
+            } else if(type === 'auto') {
+                cont.innerHTML = `<div class="space-y-6">
+                    <div class="w-full h-48 bg-slate-50 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center italic text-slate-300">Foto Vehículo</div>
+                    <div class="grid grid-cols-3 gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <div>Marca <p class="text-slate-800 text-sm">Hyundai</p></div>
+                        <div>Modelo <p class="text-slate-800 text-sm">i10</p></div>
+                        <div>Color <p class="text-slate-800 text-sm">Gris</p></div>
+                    </div>
+                    <div class="flex gap-6 pt-4 text-[11px] font-black uppercase">
+                        <label><input type="checkbox" checked disabled> Aire</label>
+                        <label><input type="checkbox" checked disabled> Licencia Operativa</label>
+                    </div>
+                </div>`;
+            } else if(type === 'fondo') {
+                cont.innerHTML = `
+                <div class="flex gap-2 mb-6">
+                    <button onclick="openModF('AGREGAR')" class="bg-green-600 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase shadow-lg">Agregar</button>
+                    <button onclick="openModF('RETIRAR')" class="bg-orange-600 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase shadow-lg">Retirar</button>
+                    <button onclick="alert('Operaciones rectificadas')" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-black text-[9px] uppercase">Rectificar Fondo</button>
                 </div>
                 <div class="overflow-x-auto"><table class="w-full text-[10px] border-collapse">
                     <thead class="bg-slate-50 text-slate-400 font-black uppercase">
-                        <tr><th class="p-4 border">Usuario</th><th class="p-4 border">Método</th><th class="p-4 border text-blue-600">Saldo</th><th class="p-4 border text-slate-500">Fondo</th><th class="p-4 border text-green-600">Activo</th><th class="p-4 border">Fecha</th></tr>
+                        <tr><th class="p-3 border">Usuario</th><th class="p-3 border">Metodo</th><th class="p-3 border text-blue-600">Saldo</th><th class="p-3 border">Fondo</th><th class="p-3 border text-green-600">Activo</th><th class="p-3 border">Fecha</th></tr>
                     </thead>
-                    <tbody class="font-bold text-center">
-                        <tr class="border-b"><td>Admin</td><td>Efectivo</td><td class="text-blue-600">+$500</td><td>$750</td><td class="font-black text-green-700">$1,250</td><td class="text-slate-400">18/02/26</td></tr>
+                    <tbody class="text-center font-bold">
+                        <tr class="border-b"><td>Admin</td><td>Efectivo</td><td class="text-blue-600">+$500</td><td>$750</td><td class="text-green-700 font-black">$1,250</td><td class="text-slate-400">18/02/26</td></tr>
                     </tbody>
                 </table></div>`;
+            }
         }
 
-        function openF(t) {
-            document.getElementById('mod-fondo').classList.remove('hidden');
-            document.getElementById('f-tit').innerText = t;
-            document.getElementById('f-met-box').classList.toggle('hidden', t==='RETIRAR');
+        // --- FONDOS MODAL ---
+        function openModF(t) {
+            document.getElementById('mod-fondos').classList.remove('hidden');
+            document.getElementById('f-modal-tit').innerText = t;
+            document.getElementById('box-metodo').classList.toggle('hidden', t === 'RETIRAR');
         }
-        function procF() { alert('Orden de fondo procesada con éxito.'); document.getElementById('mod-fondo').classList.add('hidden'); }
+        function procesarAccionFondo() { alert('Operación procesada'); document.getElementById('mod-fondos').classList.add('hidden'); }
 
-        // --- USUARIOS ---
-        function delUserPrompt() {
-            const pass = prompt("Para eliminar el usuario, introduzca su contraseña de administrador:");
-            if(pass) alert("Usuario eliminado correctamente.");
-        }
-
-        // --- GRÁFICA ---
-        const ctx = document.getElementById('chartViajes').getContext('2d');
+        // --- CHART ---
+        const ctx = document.getElementById('chart-diario').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'],
-                datasets: [{
-                    label: 'Viajes',
-                    data: [12, 19, 15, 25, 22, 30, 45],
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    fill: true,
-                    tension: 0.5,
-                    borderWidth: 4
-                }]
+                labels: ['L','M','X','J','V','S','D'],
+                datasets: [{ label: 'Viajes', data: [10, 15, 8, 20, 25, 40, 35], borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37, 99, 235, 0.05)' }]
             },
             options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
         });
