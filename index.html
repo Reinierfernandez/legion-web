@@ -8,18 +8,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-[#1e5bb9] text-white min-h-screen flex flex-col items-center p-6 font-sans">
+<body class="bg-[#1e5bb9] text-white min-h-screen flex flex-col items-center p-6 font-sans text-center">
     
-    <div class="bg-white p-4 rounded-2xl mb-6 mt-4 shadow-lg w-40 h-40 flex items-center justify-center">
+    <div class="bg-white p-4 rounded-2xl mb-6 mt-4 shadow-lg w-40 h-40 flex items-center justify-center mx-auto">
         <div class="text-center">
             <h2 class="text-5xl font-serif text-black leading-none">RF</h2>
-            <p class="text-black font-bold text-sm tracking-tighter">TransGestión</p>
+            <p class="text-black font-bold text-sm tracking-tighter uppercase">TransGestión</p>
         </div>
     </div>
 
-    <h1 class="text-4xl font-extrabold text-center mb-10 drop-shadow-md">Acceso al Sistema</h1>
+    <h1 class="text-4xl font-extrabold mb-10 drop-shadow-md">Acceso al Sistema</h1>
 
-    <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2rem] shadow-2xl text-gray-800">
+    <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2rem] shadow-2xl text-gray-800 text-left">
         <div class="mb-6">
             <label class="block text-lg font-bold mb-1">Teléfono</label>
             <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-blue-500">
@@ -33,15 +33,15 @@
         <button onclick="login()" id="loginBtn" class="w-full bg-[#2b6ada] text-white font-bold py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-all">
             Iniciar sesión
         </button>
-        <p id="msg" class="text-center mt-4 text-sm font-bold text-blue-800 h-5"></p>
+        <p id="msg" class="text-center mt-4 text-sm font-bold text-red-600 h-5"></p>
     </div>
 
     <script>
-        // Configuración oficial de tu proyecto
-        const SUPABASE_URL = 'https://gxwhscquahosusskekmk.supabase.co';
-        const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4d2hzY3F1YWhvc3Vzc2tla21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzODI1NDksImV4cCI6MjA4Njk1ODU0OX0.xWE4cOmhiszUgnx3uzsPraXD3x1SYBmxW3CSvuIiQxc';
+        // Configuración Limpia (Sin espacios)
+        const S_URL = 'https://gxwhscquahosusskekmk.supabase.co';
+        const S_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4d2hzY3F1YWhvc3Vzc2tla21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzODI1NDksImV4cCI6MjA4Njk1ODU0OX0.xWE4cOmhiszUgnx3uzsPraXD3x1SYBmxW3CSvuIiQxc';
         
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient(S_URL, S_KEY.trim());
 
         async function login() {
             const tel = document.getElementById('phone').value.trim();
@@ -50,20 +50,17 @@
             const btn = document.getElementById('loginBtn');
 
             if(!tel || !password) {
-                msg.style.color = "red";
-                msg.innerText = "Por favor, completa todos los campos";
+                msg.innerText = "Completa todos los campos";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "Verificando...";
+            btn.innerText = "Cargando...";
             msg.innerText = "";
 
-            // Rol según el número de teléfono
             let userRole = (tel === '54322676') ? 'manager' : 'gestor';
 
             try {
-                // Registrar o actualizar el usuario en la tabla de Supabase
                 const { error } = await supabaseClient
                     .from('usuarios')
                     .upsert({ 
@@ -74,23 +71,22 @@
 
                 if (error) throw error;
 
-                // Guardar datos en el navegador para el Panel
                 localStorage.setItem('userTel', tel);
                 localStorage.setItem('userRole', userRole);
 
                 msg.style.color = "green";
-                msg.innerText = "Acceso concedido. Entrando...";
+                msg.innerText = "Acceso concedido...";
 
-                // Ir al panel después de 1 segundo
                 setTimeout(() => {
                     window.location.href = 'panel.html';
-                }, 1000);
+                }, 800);
 
             } catch (err) {
                 msg.style.color = "red";
                 msg.innerText = "Error: " + err.message;
                 btn.disabled = false;
                 btn.innerText = "Iniciar sesión";
+                console.log(err);
             }
         }
     </script>
