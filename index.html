@@ -1,82 +1,92 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransGestión - Acceso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-[#1e5bb9] text-white min-h-screen flex flex-col items-center p-6">
+<body class="bg-[#1e5bb9] text-white min-h-screen flex flex-col items-center p-6 font-sans text-center">
     
     <div class="bg-white p-4 rounded-2xl mb-6 mt-4 shadow-lg w-40 h-40 flex items-center justify-center mx-auto">
         <div class="text-center">
             <h2 class="text-5xl font-serif text-black leading-none">RF</h2>
-            <p class="text-black font-bold text-sm uppercase">TransGestión</p>
+            <p class="text-black font-bold text-sm tracking-tighter uppercase">TransGestión</p>
         </div>
     </div>
 
-    <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2rem] shadow-2xl text-gray-800">
-        <div class="mb-6 text-center text-2xl font-black text-[#1e5bb9]">INICIAR SESIÓN</div>
-        
-        <label class="block text-lg font-bold mb-1">Teléfono</label>
-        <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white rounded-xl p-4 mb-4 outline-none border-2 border-transparent focus:border-blue-500">
-        
-        <label class="block text-lg font-bold mb-1">Contraseña</label>
-        <input id="pass" type="password" placeholder="*******" class="w-full bg-white rounded-xl p-4 mb-6 outline-none border-2 border-transparent focus:border-blue-500">
+    <h1 class="text-4xl font-extrabold mb-10 drop-shadow-md">Acceso al Sistema</h1>
 
-        <button onclick="login()" id="btn" class="w-full bg-[#1e5bb9] text-white font-bold py-4 rounded-2xl text-xl active:scale-95 transition-all shadow-lg">
-            ENTRAR
+    <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2rem] shadow-2xl text-gray-800 text-left">
+        <div class="mb-6">
+            <label class="block text-lg font-bold mb-1">Teléfono</label>
+            <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div class="mb-8">
+            <label class="block text-lg font-bold mb-1">Contraseña</label>
+            <input id="pass" type="password" placeholder="*******" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <button onclick="login()" id="loginBtn" class="w-full bg-[#2b6ada] text-white font-bold py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-all">
+            Iniciar sesión
         </button>
-        <p id="msg" class="text-center mt-4 font-bold text-red-600"></p>
+        <p id="msg" class="text-center mt-4 text-sm font-bold text-red-600 h-5"></p>
     </div>
 
     <script>
-        // Usando tus datos exactos de las imágenes anteriores
+        // Nuevos datos encontrados por ti
         const URL_PROYECTO = 'https://gxwhscquahosusskekmk.supabase.co';
-        const CLAVE_API = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4d2hzY3F1YWhvc3Vzc2tla21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzODI1NDksImV4cCI6MjA4Njk1ODU0OX0.xWE4cOmhiszUgnx3uzsPraXD3x1SYBmxW3CSvuIiQxc';
-
+        const CLAVE_API = 'sb_publishable_UO9XYF70yP9CosTSEd-zeA_UnUG00xf';
+        
         const supabaseClient = supabase.createClient(URL_PROYECTO, CLAVE_API);
 
         async function login() {
             const tel = document.getElementById('phone').value.trim();
-            const pass = document.getElementById('pass').value.trim();
+            const password = document.getElementById('pass').value.trim();
             const msg = document.getElementById('msg');
-            const btn = document.getElementById('btn');
+            const btn = document.getElementById('loginBtn');
 
-            if (!tel || !pass) {
-                msg.innerText = "Escribe teléfono y contraseña";
+            if(!tel || !password) {
+                msg.innerText = "Completa todos los campos";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "CONECTANDO...";
+            btn.innerText = "Conectando...";
             msg.innerText = "";
 
-            try {
-                // El sistema registrará tu contraseña la primera vez que entres
-                let rol = (tel === '54322676') ? 'manager' : 'gestor';
+            let userRole = (tel === '54322676') ? 'manager' : 'gestor';
 
+            try {
+                // Intentamos guardar/actualizar en la tabla 'usuarios'
                 const { error } = await supabaseClient
                     .from('usuarios')
-                    .upsert({ telefono: tel, password: pass, rol: rol }, { onConflict: 'telefono' });
+                    .upsert({ 
+                        telefono: tel, 
+                        password: password, 
+                        rol: userRole 
+                    }, { onConflict: 'telefono' });
 
                 if (error) throw error;
 
                 localStorage.setItem('userTel', tel);
-                localStorage.setItem('userRole', rol);
-                
+                localStorage.setItem('userRole', userRole);
+
                 msg.style.color = "green";
-                msg.innerText = "¡CONECTADO!";
-                
+                msg.innerText = "¡Acceso concedido!";
+
                 setTimeout(() => {
                     window.location.href = 'panel.html';
                 }, 1000);
 
             } catch (err) {
-                btn.disabled = false;
-                btn.innerText = "ENTRAR";
+                msg.style.color = "red";
                 msg.innerText = "Error: " + err.message;
+                btn.disabled = false;
+                btn.innerText = "Iniciar sesión";
             }
         }
     </script>
