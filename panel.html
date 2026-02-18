@@ -3,233 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TransGestión - Panel Profesional</title>
+    <title>TransGestión - Control Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .sidebar { transition: all 0.3s; width: 0; overflow: hidden; }
         .sidebar.open { width: 260px; }
+        .tab-active { border-bottom: 4px solid #1e5bb9; color: #1e5bb9; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex">
 
-    <div id="sidebar" class="sidebar fixed lg:relative z-50 h-screen bg-gray-900 text-white flex flex-col shadow-2xl">
-        <div class="p-5 text-xl font-black border-b border-gray-800 flex justify-between items-center">
+    <div id="sidebar" class="sidebar fixed lg:relative z-50 h-screen bg-gray-900 text-white flex flex-col shadow-2xl font-sans">
+        <div class="p-5 text-xl font-black border-b border-gray-800 flex justify-between items-center text-blue-400">
             <span>TRANSGESTIÓN</span>
             <button onclick="toggleMenu()" class="lg:hidden text-white"><i class="fas fa-times"></i></button>
         </div>
         <nav class="flex-1 overflow-y-auto p-4 space-y-2 text-sm">
-            <a href="javascript:void(0)" onclick="mostrarSeccion('dashboard')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-chart-line mr-3"></i> Panel de Control</a>
-            <a href="javascript:void(0)" onclick="mostrarSeccion('crear-viaje')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-plus-circle mr-3"></i> Crear Viajes</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-route mr-3"></i> Mis Viajes</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-users mr-3"></i> Choferes</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-filter mr-3"></i> Filtrar Viajes</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-clock mr-3"></i> Pagos Pendientes</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-check-double mr-3"></i> Pagos por Aprobar</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-credit-card mr-3"></i> Tarjetas</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-exchange-alt mr-3"></i> Transferencias</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-handshake mr-3"></i> Colaboración</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-user-cog mr-3"></i> Usuarios</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-wallet mr-3"></i> Economía</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-address-book mr-3"></i> Clientes</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fas fa-cog mr-3"></i> Configuración</a>
-            <a href="#" class="flex items-center p-3 hover:bg-gray-800 rounded-lg text-gray-400"><i class="fab fa-whatsapp mr-3"></i> API WhatsApp</a>
-        </nav>
+            <a href="javascript:void(0)" onclick="mostrarSeccion('dashboard')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-chart-line mr-3 w-5"></i> Panel de Control</a>
+            <a href="javascript:void(0)" onclick="mostrarSeccion('crear-viaje')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-plus-circle mr-3 w-5"></i> Crear Viajes</a>
+            <a href="javascript:void(0)" onclick="mostrarSeccion('mis-viajes')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-route mr-3 w-5"></i> Mis Viajes</a>
+            <a href="javascript:void(0)" onclick="mostrarSeccion('choferes')" class="flex items-center p-3 hover:bg-blue-600 rounded-lg transition-colors"><i class="fas fa-users mr-3 w-5"></i> Choferes</a>
+            </nav>
         <button onclick="logout()" class="p-4 bg-red-900 hover:bg-red-700 text-xs font-bold uppercase tracking-widest">Cerrar Sesión</button>
     </div>
 
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header class="bg-white shadow-sm p-4 flex items-center justify-between">
             <button onclick="toggleMenu()" class="text-gray-600 text-2xl"><i class="fas fa-bars"></i></button>
-            <div class="flex items-center space-x-4">
-                <span id="userRoleBadge" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Cargando...</span>
-                <span id="userTel" class="text-gray-600 font-medium"></span>
-            </div>
+            <div class="flex items-center space-x-4 italic font-bold text-blue-900" id="userTelHeader"></div>
         </header>
 
         <main id="main-content" class="p-4 lg:p-8 overflow-y-auto">
             
-            <div id="section-dashboard" class="space-y-8">
-                <h2 class="text-3xl font-black text-gray-800">Panel de Control</h2>
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
-                    <h3 class="text-lg font-bold text-gray-700 mb-4 italic">Viajes Diarios</h3>
-                    <div class="h-64"><canvas id="viajesChart"></canvas></div>
-                </div>
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden text-sm">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                        <h3 class="text-lg font-bold text-gray-700 italic">Viajes Recientes</h3>
+            <div id="section-mis-viajes" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-black text-gray-800">Registro de Viajes</h2>
+                    <div class="relative">
+                        <button onclick="document.getElementById('filtro-viajes').classList.toggle('hidden')" class="bg-white border p-2 rounded-xl shadow-sm flex items-center font-bold text-sm">
+                            <i class="fas fa-filter mr-2 text-blue-600"></i> Filtrar
+                        </button>
+                        <div id="filtro-viajes" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-xl p-2 z-50 border">
+                            <button class="w-full text-left p-2 hover:bg-gray-100 rounded-lg text-sm">Hoy</button>
+                            <button class="w-full text-left p-2 hover:bg-gray-100 rounded-lg text-sm">Semana</button>
+                            <button class="w-full text-left p-2 hover:bg-gray-100 rounded-lg text-sm">Mes</button>
+                            <button class="w-full text-left p-2 hover:bg-gray-100 rounded-lg text-sm">Desde-Hasta</button>
+                        </div>
                     </div>
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 text-gray-400 uppercase text-[10px] tracking-widest">
-                            <tr><th class="p-4">Choferes</th><th class="p-4">Precio</th><th class="p-4">Origen</th></tr>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-400 uppercase text-[10px]">
+                            <tr><th class="p-4">Chofer</th><th class="p-4 text-center">Precio</th><th class="p-4">Origen</th><th class="p-4">Estado</th></tr>
                         </thead>
-                        <tbody id="viajesTableBody">
-                            <tr class="border-b"><td class="p-4 font-bold">Juan Pérez</td><td class="p-4 text-green-600">$150</td><td class="p-4">Habana</td></tr>
-                        </tbody>
+                        <tbody id="lista-viajes-all">
+                            </tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="section-crear-viaje" class="hidden max-w-4xl mx-auto bg-white p-6 rounded-3xl shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-black text-gray-800 mb-6 flex items-center"><i class="fas fa-plus-circle text-blue-600 mr-3"></i> Elaborar Viaje</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Colaboración</label>
-                        <select id="v-colab" class="w-full p-3 bg-gray-50 border rounded-xl outline-none"><option>Ninguna</option><option>Agencia A</option></select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Chofer (Teléfono)</label>
-                        <div class="flex space-x-2">
-                            <input id="v-chofer-tel" type="tel" placeholder="55555555" class="flex-1 p-3 bg-gray-50 border rounded-xl">
-                            <button onclick="buscarChofer()" class="bg-blue-600 text-white px-4 rounded-xl"><i class="fas fa-search"></i></button>
+            <div id="section-choferes" class="hidden space-y-6">
+                <h2 class="text-2xl font-black text-gray-800">Gestión de Choferes</h2>
+                <div id="lista-choferes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border flex justify-between items-center">
+                        <div>
+                            <p class="font-black text-gray-800">Mario López</p>
+                            <p class="text-xs text-gray-500">Tel: 55555555</p>
+                            <p class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full w-max mt-1 font-bold">Lic. Operativa: SÍ</p>
+                            <p class="text-blue-700 font-bold mt-2">Fondo: $1,250.00</p>
                         </div>
-                        <div id="chofer-info" class="mt-2 p-3 bg-blue-50 rounded-xl hidden text-xs">
-                            <p id="info-nombre" class="font-bold text-gray-700"></p>
-                            <p id="info-fondo" class="text-green-600 font-bold"></p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Cliente (Tel)</label><input id="v-cliente" type="tel" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">Pax</label><input id="v-pax" type="number" class="w-full p-3 bg-gray-50 border rounded-xl text-center"></div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Precio ($)</label>
-                        <input id="v-precio" type="number" class="w-full p-3 bg-blue-50 border-blue-200 border rounded-xl text-lg font-bold text-blue-700">
-                        <div class="mt-2 p-3 bg-gray-100 rounded-xl grid grid-cols-2 gap-2">
-                            <input id="calc-dist" type="number" placeholder="Km" class="p-2 text-xs border rounded-lg">
-                            <input id="calc-tarifa" type="number" placeholder="Tarifa" class="p-2 text-xs border rounded-lg">
-                            <button onclick="calcularPrecio()" class="col-span-2 bg-gray-700 text-white text-[10px] py-2 rounded-lg font-bold">CALCULAR PRECIO</button>
+                        <div class="relative">
+                            <button onclick="toggleDrop('drop-1')" class="text-gray-400 p-2"><i class="fas fa-ellipsis-v"></i></button>
+                            <div id="drop-1" class="hidden absolute right-0 w-32 bg-white shadow-xl border rounded-xl z-10">
+                                <button onclick="verPerfilChofer()" class="w-full text-left p-3 text-sm hover:bg-blue-50 font-bold">Ver</button>
+                                <button class="w-full text-left p-3 text-sm hover:bg-red-50 text-red-600 font-bold">Eliminar</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Origen</label>
-                        <input id="v-origen" type="text" class="w-full p-3 bg-gray-50 border rounded-xl mb-2">
-                        <div id="contenedor-paradas" class="space-y-2 mb-2"></div>
-                        <button onclick="añadirParada()" class="text-blue-600 text-xs font-bold"><i class="fas fa-plus-circle mr-1"></i> Añadir Parada Intermedia</button>
-                    </div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Destino</label><input id="v-destino" type="text" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Grupo WhatsApp</label><input id="v-grupo" type="text" class="w-full p-3 bg-gray-50 border rounded-xl"></div>
-                    <div class="md:col-span-2 grid grid-cols-2 gap-3 py-2 text-xs font-bold">
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-transf"> <span>Transferencia</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-precio-cli"> <span>Precio Cliente</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-aire"> <span>Aire Acond.</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="v-regreso"> <span>Ida y Vuelta</span></label>
-                    </div>
-                    <div class="md:col-span-2 border-t pt-4">
-                        <label class="flex items-center space-x-2 text-sm font-black cursor-pointer mb-3">
-                            <input type="checkbox" id="v-es-reserva" onchange="toggleReserva()" class="w-5 h-5"> <span>VIAJE RESERVADO</span>
-                        </label>
-                        <div id="zona-reserva" class="hidden grid grid-cols-2 gap-4"><input id="v-fecha" type="date" class="p-3 bg-blue-50 border rounded-xl"><input id="v-hora" type="time" class="p-3 bg-blue-50 border rounded-xl"></div>
-                    </div>
-                    <div class="md:col-span-2"><label class="block text-sm font-bold text-gray-700 mb-1">Observaciones</label><textarea id="v-obs" rows="2" class="w-full p-3 bg-gray-50 border rounded-xl"></textarea></div>
-                </div>
-                <div class="mt-8 grid grid-cols-2 gap-4">
-                    <button onclick="generarPlanillas()" class="bg-gray-800 text-white p-4 rounded-2xl font-black shadow-lg">PLANILLA</button>
-                    <button onclick="alert('Guardado con éxito (Próximamente en base de datos)')" class="bg-blue-600 text-white p-4 rounded-2xl font-black shadow-lg">CREAR VIAJE</button>
                 </div>
             </div>
+
+            <div id="section-perfil-chofer" class="hidden space-y-6 animate-fade-in">
+                <button onclick="mostrarSeccion('choferes')" class="text-blue-600 font-bold flex items-center"><i class="fas fa-arrow-left mr-2"></i> Volver</button>
+                
+                <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden p-6">
+                    <div class="flex flex-col items-center">
+                        <div class="w-40 h-40 bg-gray-200 rounded-3xl mb-4 overflow-hidden border-4 border-blue-50">
+                            <img src="https://via.placeholder.com/150" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-black text-gray-800">Mario López</h3>
+                        <div class="flex space-x-4 mt-4 text-center">
+                            <div class="bg-blue-50 p-3 rounded-2xl"><p class="text-[10px] text-gray-400">Hoy</p><p class="font-bold">$0</p></div>
+                            <div class="bg-blue-50 p-3 rounded-2xl"><p class="text-[10px] text-gray-400">Mes</p><p class="font-bold">$1,250</p></div>
+                            <div class="bg-blue-50 p-3 rounded-2xl"><p class="text-[10px] text-gray-400">Total</p><p class="font-bold">$4,500</p></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-around border-y py-4">
+                        <label class="flex items-center space-x-2 text-xs font-bold"><input type="checkbox"> <span>Trabajar sin créditos</span></label>
+                        <div class="text-[10px] font-bold">Grupo: <input type="radio" name="grp"> A <input type="radio" name="grp"> B</div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mt-6">
+                        <button class="bg-blue-100 text-blue-700 p-3 rounded-xl font-bold text-xs">FILTRAR</button>
+                        <button class="bg-green-100 text-green-700 p-3 rounded-xl font-bold text-xs">WHATSAPP</button>
+                        <button class="bg-red-100 text-red-700 p-3 rounded-xl font-bold text-xs">ELIMINAR</button>
+                    </div>
+
+                    <div class="mt-8">
+                        <div class="flex space-x-4 border-b text-xs font-bold text-gray-400 overflow-x-auto">
+                            <button onclick="tabPerfil('info')" id="tab-info" class="pb-2 tab-active">INFORMACIÓN</button>
+                            <button onclick="tabPerfil('auto')" id="tab-auto" class="pb-2">AUTO</button>
+                            <button onclick="tabPerfil('fondo')" id="tab-fondo" class="pb-2">FONDO</button>
+                        </div>
+
+                        <div id="cont-perfil" class="py-6 min-h-[200px]">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <div id="modal-planillas" class="fixed inset-0 bg-black/80 hidden z-[100] p-4 flex items-center justify-center overflow-y-auto">
-        <div class="bg-white w-full max-w-lg rounded-3xl p-6 relative">
-            <button onclick="cerrarModal()" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
-            <div class="space-y-6">
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <h4 class="text-blue-700 font-bold mb-2">Planilla Chofer</h4>
-                    <pre id="txt-chofer" class="text-[10px] whitespace-pre-wrap font-mono p-2 bg-white rounded border"></pre>
-                    <button onclick="enviarWhatsApp('chofer')" class="w-full mt-2 bg-green-500 text-white py-2 rounded-lg text-sm font-bold">Enviar WhatsApp</button>
+    <div id="modal-fondo" class="fixed inset-0 bg-black/50 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm">
+            <h4 id="fondo-titulo" class="font-black text-xl mb-4"></h4>
+            <div class="space-y-4">
+                <div id="div-metodo" class="hidden">
+                    <label class="text-xs font-bold uppercase">Método</label>
+                    <select id="f-metodo" class="w-full p-3 bg-gray-50 rounded-xl border"><option>Efectivo</option><option>Transferencia</option></select>
                 </div>
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <h4 class="text-green-700 font-bold mb-2">Planilla Cliente</h4>
-                    <pre id="txt-cliente" class="text-[10px] whitespace-pre-wrap font-mono p-2 bg-white rounded border"></pre>
-                    <button onclick="enviarWhatsApp('cliente')" class="w-full mt-2 bg-green-600 text-white py-2 rounded-lg text-sm font-bold">Enviar WhatsApp</button>
+                <div>
+                    <label class="text-xs font-bold uppercase">Cantidad ($)</label>
+                    <input id="f-cantidad" type="number" class="w-full p-3 bg-gray-50 rounded-xl border text-xl font-bold">
                 </div>
+                <button onclick="procesarFondo()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold shadow-lg">PROCESAR</button>
+                <button onclick="this.parentElement.parentElement.parentElement.classList.add('hidden')" class="w-full text-gray-400 font-bold text-sm mt-2">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN INICIAL
-        const tel = localStorage.getItem('userTel');
-        const rol = localStorage.getItem('userRole');
-        if (!tel) window.location.href = 'index.html';
-        document.getElementById('userTel').innerText = tel;
-        document.getElementById('userRoleBadge').innerText = rol === 'manager' ? 'Administrador' : 'Gestor';
-
-        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
-        if(window.innerWidth > 1024) toggleMenu();
-
+        // LÓGICA DE NAVEGACIÓN
         function mostrarSeccion(id) {
-            document.getElementById('section-dashboard').classList.add('hidden');
-            document.getElementById('section-crear-viaje').classList.add('hidden');
+            const secciones = ['dashboard', 'crear-viaje', 'mis-viajes', 'choferes', 'perfil-chofer'];
+            secciones.forEach(s => document.getElementById('section-' + s)?.classList.add('hidden'));
             document.getElementById('section-' + id).classList.remove('hidden');
             if(window.innerWidth < 1024) toggleMenu();
         }
 
-        // LÓGICA CREAR VIAJE
-        function añadirParada() {
-            const input = document.createElement('input');
-            input.placeholder = "Parada intermedia...";
-            input.className = "w-full p-3 bg-yellow-50 border border-yellow-200 rounded-xl mb-2 text-sm";
-            document.getElementById('contenedor-paradas').appendChild(input);
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+        function toggleDrop(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        // PERFIL DEL CHOFER
+        function verPerfilChofer() {
+            mostrarSeccion('perfil-chofer');
+            tabPerfil('info');
         }
 
-        function buscarChofer() {
-            const num = document.getElementById('v-chofer-tel').value;
-            if(num) {
-                document.getElementById('chofer-info').classList.remove('hidden');
-                document.getElementById('info-nombre').innerText = "Nombre: Chofer de prueba";
-                document.getElementById('info-fondo').innerText = "Fondo Actual: $500.00";
+        function tabPerfil(tipo) {
+            const cont = document.getElementById('cont-perfil');
+            document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.remove('tab-active'));
+            document.getElementById('tab-' + tipo).classList.add('tab-active');
+
+            if(tipo === 'info') {
+                cont.innerHTML = `<div class="space-y-4">
+                    <p class="text-xs font-bold text-gray-400">NOMBRE Y APELLIDOS</p><p class="font-bold border-b pb-2">Mario López Pérez</p>
+                    <p class="text-xs font-bold text-gray-400">TELÉFONO</p><p class="font-bold border-b pb-2">55555555</p>
+                </div>`;
+            } else if(tipo === 'auto') {
+                cont.innerHTML = `<div class="space-y-4">
+                    <div class="w-full h-32 bg-gray-100 rounded-2xl flex items-center justify-center italic text-gray-400">Foto del Vehículo</div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><p class="text-xs font-bold text-gray-400">MARCA/MODELO</p><p class="font-bold">Hyundai i10</p></div>
+                        <div><p class="text-xs font-bold text-gray-400">COLOR</p><p class="font-bold">Gris Plata</p></div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <label class="text-xs font-bold"><input type="checkbox" checked disabled> Aire Acondicionado</label>
+                        <label class="text-xs font-bold"><input type="checkbox" checked disabled> Lic. Operativa</label>
+                    </div>
+                </div>`;
+            } else if(tipo === 'fondo') {
+                cont.innerHTML = `
+                <div class="flex space-x-2 mb-4">
+                    <button onclick="abrirFondo('agregar')" class="bg-green-600 text-white text-[10px] px-3 py-2 rounded-lg font-bold">AGREGAR</button>
+                    <button onclick="abrirFondo('retirar')" class="bg-orange-600 text-white text-[10px] px-3 py-2 rounded-lg font-bold">RETIRAR</button>
+                    <button class="bg-gray-800 text-white text-[10px] px-3 py-2 rounded-lg font-bold">RECTIFICAR</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-[10px] border">
+                        <thead class="bg-gray-50 uppercase font-black">
+                            <tr><th class="p-2 border">Usuario</th><th class="p-2 border">Metodo</th><th class="p-2 border text-blue-600">Saldo</th><th class="p-2 border">Fondo</th><th class="p-2 border text-green-600">Activo</th><th class="p-2 border">Fecha</th></tr>
+                        </thead>
+                        <tbody id="historial-fondo">
+                            <tr><td class="p-2 border">Admin</td><td class="p-2 border">Efectivo</td><td class="p-2 border font-bold">+$500</td><td class="p-2 border">$750</td><td class="p-2 border font-black">$1,250</td><td class="p-2 border text-gray-400">18/02/26</td></tr>
+                        </tbody>
+                    </table>
+                </div>`;
             }
         }
 
-        function calcularPrecio() {
-            const km = document.getElementById('calc-dist').value;
-            const t = document.getElementById('calc-tarifa').value;
-            if(km && t) document.getElementById('v-precio').value = km * t;
+        // LÓGICA DE FONDOS
+        function abrirFondo(tipo) {
+            document.getElementById('modal-fondo').classList.remove('hidden');
+            document.getElementById('fondo-titulo').innerText = tipo === 'agregar' ? 'Agregar Fondo' : 'Retirar Fondo';
+            document.getElementById('div-metodo').classList.toggle('hidden', tipo !== 'agregar');
         }
 
-        function toggleReserva() {
-            document.getElementById('zona-reserva').classList.toggle('hidden', !document.getElementById('v-es-reserva').checked);
+        function procesarFondo() {
+            const cant = document.getElementById('f-cantidad').value;
+            if(!cant) return;
+            alert("Operación procesada. Nuevo fondo actualizado.");
+            document.getElementById('modal-fondo').classList.add('hidden');
         }
 
-        function generarPlanillas() {
-            const p = document.getElementById('v-precio').value;
-            const c = document.getElementById('v-cliente').value;
-            const o = document.getElementById('v-origen').value;
-            const d = document.getElementById('v-destino').value;
-            const px = document.getElementById('v-pax').value || 1;
-
-            const pCh = `*DATOS DEL VIAJE*\nPrecio: ${p}\nCliente: ${c}\nOrigen: ${o}\nDestino: ${d}\nPax: ${px}\nFondo Actual: $500\n\n⚠️ IMPORTANTE ⚠️\n• 15 min máx. llegada.\n• 15 min cortesía espera. (Extra: 25 cup/min)\n• Tarde: descuento 50%.`;
-            const pCl = `*Taxi En Camino*\nPrecio: ${p}\nChofer: Prueba\nAuto: Estándar\n\n⚠️ *IMPORTANTE* ⚠️\n• Parada extra recalcula costo.\n• 10 min cortesía. (Extra: 25 cup/min).\n• Cancelar en origen: paga 50%.`;
-
-            document.getElementById('txt-chofer').innerText = pCh;
-            document.getElementById('txt-cliente').innerText = pCl;
-            document.getElementById('modal-planillas').classList.remove('hidden');
+        // CALCULO DE COMISIÓN (12% vs 15%)
+        function calcularComision(precioViaje, tieneLicencia) {
+            const porcentaje = tieneLicencia ? 0.12 : 0.15;
+            return precioViaje * porcentaje;
         }
-
-        function enviarWhatsApp(tipo) {
-            const num = tipo === 'chofer' ? document.getElementById('v-chofer-tel').value : document.getElementById('v-cliente').value;
-            const msg = encodeURIComponent(tipo === 'chofer' ? document.getElementById('txt-chofer').innerText : document.getElementById('txt-cliente').innerText);
-            window.open(`https://wa.me/53${num}?text=${msg}`, '_blank');
-        }
-
-        function cerrarModal() { document.getElementById('modal-planillas').classList.add('hidden'); }
 
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
-
-        // GRÁFICA INICIAL
-        const ctx = document.getElementById('viajesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: { labels: ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'], datasets: [{ label: 'Viajes', data: [5, 10, 8, 15, 6, 20, 12], borderColor: '#1e5bb9', tension: 0.4 }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
     </script>
 </body>
 </html>
