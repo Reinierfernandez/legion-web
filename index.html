@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TransGestión - Login</title>
+    <title>TransGestión - Acceso</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-[#1e5bb9] text-white min-h-screen flex flex-col items-center p-6 font-sans">
     
@@ -15,31 +17,80 @@
         </div>
     </div>
 
-    <h1 class="text-4xl font-extrabold text-center mb-10 drop-shadow-md">
-        Sistema de Gestión de<br>Transporte
-    </h1>
+    <h1 class="text-4xl font-extrabold text-center mb-10 drop-shadow-md">Acceso al Sistema</h1>
 
     <div class="w-full max-w-sm bg-[#c8d7f0] p-8 rounded-[2rem] shadow-2xl text-gray-800">
         <div class="mb-6">
-            <label class="block text-lg font-bold mb-1">Número de Teléfono</label>
-            <input type="tel" value="+53 54322676" class="w-full bg-white border-none rounded-xl p-4 text-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
-            <p class="text-xs text-gray-500 mt-2">Incluye el código de país (ej: +53)</p>
+            <label class="block text-lg font-bold mb-1">Teléfono</label>
+            <input id="phone" type="tel" placeholder="54322676" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         
         <div class="mb-8">
             <label class="block text-lg font-bold mb-1">Contraseña</label>
-            <input type="password" value="........" class="w-full bg-white border-none rounded-xl p-4 text-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+            <input id="pass" type="password" placeholder="*******" class="w-full bg-white border-none rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <button onclick="window.location.href='panel.html'" class="w-full bg-[#2b6ada] hover:bg-[#1e4fa3] text-white font-bold py-4 rounded-2xl text-xl shadow-lg transition-transform active:scale-95">
-    Iniciar sesión
-</button>
-
-
-        <div class="text-center mt-6">
-            <a href="#" class="text-[#2b6ada] font-semibold hover:underline">¿No tienes cuenta? Registrarse</a>
-        </div>
+        <button onclick="login()" id="loginBtn" class="w-full bg-[#2b6ada] text-white font-bold py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-all">
+            Iniciar sesión
+        </button>
+        <p id="msg" class="text-center mt-4 text-sm font-bold text-blue-800 h-5"></p>
     </div>
 
+    <script>
+        // Tus credenciales de Supabase
+        const SUPABASE_URL = 'https://gxwhscquahosusskekmk.supabase.co';
+        const SUPABASE_KEY = 'Sb_publishable_UO9XYF70yP9CosTSEd-zeA_UnUG00xf';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function login() {
+            const tel = document.getElementById('phone').value.trim();
+            const password = document.getElementById('pass').value.trim();
+            const msg = document.getElementById('msg');
+            const btn = document.getElementById('loginBtn');
+
+            if(!tel || !password) {
+                msg.innerText = "Por favor, completa todos los campos";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Verificando...";
+            msg.innerText = "";
+
+            // Definir rol (Manager para tu número, Gestor para el resto)
+            let userRole = (tel === '54322676') ? 'manager' : 'gestor';
+
+            try {
+                // Guardar o actualizar usuario en la tabla
+                const { error } = await supabaseClient
+                    .from('usuarios')
+                    .upsert({ 
+                        telefono: tel, 
+                        password: password, 
+                        rol: userRole 
+                    }, { onConflict: 'telefono' });
+
+                if (error) throw error;
+
+                // Guardar sesión local
+                localStorage.setItem('userTel', tel);
+                localStorage.setItem('userRole', userRole);
+
+                msg.style.color = "green";
+                msg.innerText = "Acceso concedido. Entrando...";
+
+                // Redirigir al panel
+                setTimeout(() => {
+                    window.location.href = 'panel.html';
+                }, 1000);
+
+            } catch (err) {
+                msg.style.color = "red";
+                msg.innerText = "Error de conexión: " + err.message;
+                btn.disabled = false;
+                btn.innerText = "Iniciar sesión";
+            }
+        }
+    </script>
 </body>
 </html>
